@@ -10,7 +10,7 @@ contract AUTH {
 
     struct OTP {
         User user;
-        string pass;
+        uint16 pass;
         uint256 timestamp;
         bool isUsed;
         bool isExpired;
@@ -98,22 +98,26 @@ contract AUTH {
 // </editor-fold>
 
 // <editor-fold defaultstate="collapsed" desc="OTP functions">
-    // This is to be called by web3 with the encrypted otp
-    function storeEncOTP() public isUser returns(string memory cOTP){
-        // We fill the fields for the OTP, with the pass encrypted
+
+    function genOTP() private {
+        // We generate a random number from 0 to 9999
+        uint16 pass = uint16(uint256( keccak256( abi.encode(now, msg.sender) ) ) % 9999);
+    
+        // We fill the fields for the OTP
         otpList[msg.sender].user = userList[msg.sender];
         otpList[msg.sender].timestamp = block.timestamp;
-        otpList[msg.sender].pass = cOTP;
+        otpList[msg.sender].pass = pass;
         otpList[msg.sender].isUsed = false;
         otpList[msg.sender].isExpired = false;
     }
 
-    // This is the encrypted pass and time remaining
-    function getEncOTP() public isUser view returns
-    (string memory cOTP_2string, uint aproxTime){
+    // This is the pass and time remaining
+    // It returns the caller's OTP
+    function getOTP() public isUser view returns
+    (uint16 OTPnumber, uint aproxTime){
         // We only need to return the OTP pass
         // And an aproximate remaining time
-        // Returns negative value if expored
+        // Returns negative value if expired
         aproxTime = (now + OTPtimeout - otpList[msg.sender].timestamp);
         return (otpList[msg.sender].pass, aproxTime);
     }
