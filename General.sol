@@ -1,12 +1,16 @@
 pragma solidity >=0.4.22 <0.7.0;
 
 import "./AuthContract.sol";
-import "./_structs_events.sol";
 
 contract GeneralContract {
 
     /* STRUCTS */
-
+    struct User {
+            bool isNull;
+            bool isLoggedIn;
+            bool isAdmin;
+            AuthContract auth;
+    }
     /* EVENTS */
     event createAdmin(address _adm, address _who, uint256 t);
 
@@ -23,7 +27,6 @@ contract GeneralContract {
     }
 
     /* Contract data */
-
     mapping ( address => User) userList;
     //mapping ( address => OTP) otpList;
     address owner;
@@ -46,12 +49,11 @@ contract GeneralContract {
     }
 
     function addUser(address _addr) public isAdmin {
+        userList[_addr].auth = AuthContract(_addr);
         userList[_addr].isNull = true;
         userList[_addr].isAdmin = false;
         userList[_addr].isLoggedIn = false;
     }
-
-
 
     function addAdmin(address _addr) public isAdmin {
         // Check that the user is added
