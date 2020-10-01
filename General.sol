@@ -1,6 +1,6 @@
 pragma solidity >=0.4.22 <0.7.0;
 
-import "./Auth.sol";
+import "./AuthContract.sol";
 import "./_structs_events.sol";
 
 contract GeneralContract {
