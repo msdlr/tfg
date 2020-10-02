@@ -3,8 +3,8 @@ import "./General.sol";
 
 contract AuthContract {
 
-    // This contract is instantiated by every person who has
-    // to login
+    // This contract is created by the administrators
+    // for every person that use the login system
 
     /* STRUCTS */
     struct OTP {
@@ -14,7 +14,7 @@ contract AuthContract {
         bool isUsed;
         uint16 ttl;
         // The OTP can expire the next day it's issued (p.e. 00:01)
-        uint32 day; // 2^32 days is about 136 years
+        uint32 date; // 2^32 days is about 136 years
     }
 
     /* MODIFIERS */
@@ -43,18 +43,21 @@ contract AuthContract {
 
     /* FUNCTIONS */
     function tryLogin(uint16 _pass) public onlyEmployee {
-
-        
+        // We just revert if the OTP is not valid
+        require(checkValid()); _;
+        require ( keccak256(abi.encode(_pass)) == eOTP.passHash, "The password is not correct" );
     }
 
-    function checkValid() private returns (bool valid) {
+    function checkValid() internal returns (bool valid) {
         // We first check if the OTP is used
-        valid = !eOTP.isUsed;
-        if(valid){
+        if(eOTP.isUsed) valid = false;
+        //Then we check the time
+        else{
             // Check if the issued day is today
-            if(eOTP.day == getToday()){
-                //valid = (eOTP.time )
+            if(eOTP.date days + ttl seconds > getToday() days + getSeconds() seconds){
+                valid = false;
             }
+            else valid = true;
         }
         return valid;
     }
@@ -70,7 +73,7 @@ contract AuthContract {
         // TTL
         eOTP.ttl = uint16(5 minutes);
         // OTP day
-        eOTP.day = getToday();
+        eOTP.date = getToday();
         // Used flag
         eOTP.isUsed = false;
         // Pass Hash
