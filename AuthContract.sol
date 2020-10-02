@@ -28,6 +28,11 @@ contract AuthContract {
         _;
     }
 
+    modifier validOTP{
+        require(eOTP.isUsed == false);
+        require(eOTP.date days + ttl seconds <= getToday() days + getSeconds() seconds);
+    }
+
     /* ATTRIBUTES */
     GeneralContract gc;
     address employee;
@@ -42,24 +47,10 @@ contract AuthContract {
     }
 
     /* FUNCTIONS */
-    function tryLogin(uint16 _pass) public onlyEmployee {
+    function tryLogin(uint16 _pass) public onlyEmployee validOTP {
         // We just revert if the OTP is not valid
         require(checkValid()); _;
         require ( keccak256(abi.encode(_pass)) == eOTP.passHash, "The password is not correct" );
-    }
-
-    function checkValid() internal returns (bool valid) {
-        // We first check if the OTP is used
-        if(eOTP.isUsed) valid = false;
-        //Then we check the time
-        else{
-            // Check if the issued day is today
-            if(eOTP.date days + ttl seconds > getToday() days + getSeconds() seconds){
-                valid = false;
-            }
-            else valid = true;
-        }
-        return valid;
     }
 
     // Returns the generated pass and generate the OTP struture
