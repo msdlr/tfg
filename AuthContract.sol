@@ -18,13 +18,9 @@ contract AuthContract {
     }
 
     /* MODIFIERS */
-    modifier onlyEmployee{
-        require(msg.sender == employee,"THis is to be called by the employee");
-        _;
-    }
-    
+ 
     modifier onlyContract{
-        require(msg.sender == employee,"can only be called from the company contract");
+        require(msg.sender == gc,"can only be called from the company contract");
         _;
     }
 
@@ -33,7 +29,7 @@ contract AuthContract {
         require(eOTP.date days + ttl seconds <= getToday() days + getSeconds() seconds);
     }
 
-    /* ATTRIBUTES */
+    /* STATUS VARIABLES */
     GeneralContract gc;
     address employee;
     OTP eOTP;
@@ -47,14 +43,14 @@ contract AuthContract {
     }
 
     /* FUNCTIONS */
-    function tryLogin(uint16 _pass) public onlyEmployee validOTP {
+    function tryLogin(uint16 _pass) public validOTP {
         // We just revert if the OTP is not valid
-        require(checkValid()); _;
-        require ( keccak256(abi.encode(_pass)) == eOTP.passHash, "The password is not correct" );
+        require(checkValid());
+        require (keccak256(abi.encode(_pass)) == eOTP.passHash, "The password is not correct");
     }
 
     // Returns the generated pass and generate the OTP struture
-    function newOTP() public onlyEmployee returns (uint16 pass_){
+    function newOTP() public onlyContract returns (uint16 pass_){
         // Generate the OTP number
         uint16 p = uint16(uint256(keccak256(abi.encode(now, msg.sender))) % 9999);
 
