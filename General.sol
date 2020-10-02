@@ -28,7 +28,7 @@ contract GeneralContract {
         _;
     }
 
-    modifier userNotBlocked{
+    modifier userNotLocked{
         require (userList[msg.sender].attempts < 3);
         _;
     }
@@ -80,13 +80,13 @@ contract GeneralContract {
     }
 
     /* -- USER FUNCTIONS (WRAPPERS)-- */
-    function getOTP() public isUser userNotBlocked returns(uint16 pass_){
+    function getOTP() public isUser userNotLocked returns(uint16 pass_){
         require (userList[msg.sender].isLoggedIn == false, "Only offline users can ask for a key");
         // We call that specific contract function
         pass_ = userList[msg.sender].Contract.newOTP();
     }
 
-    function tryLogin(uint16 _pass) public isUser userNotBlocked {
+    function tryLogin(uint16 _pass) public isUser userNotLocked {
         // We call that specific contract function
         require(userList[_addr].isLoggedIn == false, "You are already logged in");
         
