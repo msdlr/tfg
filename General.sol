@@ -6,6 +6,7 @@ contract GeneralContract {
 
     /* STRUCTS */
     struct User {
+            string id;
             bool isNull;
             bool isLoggedIn;
             bool isAdmin;
@@ -28,7 +29,7 @@ contract GeneralContract {
 
     /* Contract data */
     mapping ( address => User) userList;
-    //mapping ( address => OTP) otpList;
+    mapping ( string => address) id2a; // Index by id
     address owner;
 
     /* CONSTRUCTOR */
@@ -42,17 +43,25 @@ contract GeneralContract {
         userList[owner].isAdmin = true;
     }
 
-    function rmUser(address _addr) public isAdmin {
+    /* -- ADMIN FUNCTIONS -- */
+
+    function rmUser(address _addr, string _id) public isAdmin {
+        // _addr = id2a[_id]
+        userList[_addr].auth.terminate();
         userList[_addr].isNull = false;
         userList[_addr].isAdmin = false;
         userList[_addr].isLoggedIn = false;
+        id2a[_id] = address(0);
+        userList[_addr].id = "";
     }
 
-    function addUser(address _addr) public isAdmin {
+    function addUser(address _addr, string _id) public isAdmin {
         userList[_addr].auth = AuthContract(_addr);
         userList[_addr].isNull = true;
         userList[_addr].isAdmin = false;
         userList[_addr].isLoggedIn = false;
+        userList[_addr].id = _id;
+        id2a[_id] = _addr;
     }
 
     function addAdmin(address _addr) public isAdmin {
@@ -64,4 +73,14 @@ contract GeneralContract {
         emit createAdmin(_addr, msg.sender, now);
     }
 
+    /* -- USER FUNCTIONS (WRAPPERS)-- */
+    function getOTP() public isUser returns(uint16 pass_){
+        // We call that specific contract function 
+        pass_ = userList[msg.sender].Contract.newOTP();
+    }
+
+    function tryLogin(uint16 _pass) public isUser {
+        // We call that specific contract function 
+        userList[msg.sender].Contract.tryLogin(_pass);
+    }
 }
