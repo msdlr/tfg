@@ -81,6 +81,13 @@ contract GeneralContract {
 
     function tryLogin(uint16 _pass) public isUser {
         // We call that specific contract function
+        require(userList[_addr].isLoggedIn == false, "You are already logged in");
         userList[msg.sender].Contract.tryLogin(_pass);
+    }
+
+    function tryLogout() public isUser {
+        // Can only logout if logged in
+        require(userList[_addr].isLoggedIn == true, "You are not logged in");
+        userList[_addr].auth.logout();
     }
 }
