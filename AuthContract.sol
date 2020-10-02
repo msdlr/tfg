@@ -1,4 +1,4 @@
-pragma solidity >=0.4.22 <0.7.0;
+pragma solidity ^0.7.2;
 import "./General.sol";
 
 contract AuthContract {
@@ -20,13 +20,14 @@ contract AuthContract {
     /* MODIFIERS */
  
     modifier onlyContract{
-        require(msg.sender == gc,"can only be called from the company contract");
+        require(msg.sender == address(gc),"can only be called from the company contract");
         _;
     }
 
     modifier validOTP{
         require(eOTP.isUsed == false);
-        require(eOTP.date days + ttl seconds <= getToday() days + getSeconds() seconds);
+        require( (eOTP.date * 1 days) + (eOTP.ttl * 1 seconds) == (getToday() * 1 days) + (secondOfDay() * 1 seconds));
+        _;
     }
 
     /* STATUS VARIABLES */
@@ -43,20 +44,19 @@ contract AuthContract {
     }
 
     /* FUNCTIONS */
-    function tryLogin(uint16 _pass) public validOTP {
+    function tryLogin(uint16 _pass) public view validOTP {
         // We just revert if the OTP is not valid
-        require(checkValid());
         require (keccak256(abi.encode(_pass)) == eOTP.passHash, "The password is not correct");
     }
 
     // Returns the generated pass and generate the OTP struture
     function newOTP() public onlyContract returns (uint16 pass_){
         // Generate the OTP number
-        uint16 p = uint16(uint256(keccak256(abi.encode(now, msg.sender))) % 9999);
+        uint16 p = uint16(uint256(keccak256(abi.encode(block.timestamp, msg.sender))) % 9999);
 
         //Fill the OTP fields:
         // Timestamp: relative to today instead of 1970
-        eOTP.time = uint24(now % 1 days); // Timestamp relative to the day
+        eOTP.time = uint24(block.timestamp % 1 days); // Timestamp relative to the day
         // TTL
         eOTP.ttl = uint16(5 minutes);
         // OTP day
@@ -70,18 +70,17 @@ contract AuthContract {
         return p;
     }
 
-    function terminate() external fromgContract{
+    function terminate() external onlyContract{
         // We already require that msg.sender is the general contract
         selfdestruct(msg.sender);
     }
 
     //Day number since 1/1/2020 (UNIX time + 50 years)
     function getToday() private view returns(uint8 today){
-        uint day = (now / 1 days) - (50*365 days);
+        uint day = (block.timestamp / 1 days) - (50*365 days);
         return uint8(day);
     }
     function secondOfDay() private view returns(uint24 sec){
-        uint24 sec = now % getToday();
-        return sec;
+        sec = uint24(block.timestamp % getToday());
     }
 }

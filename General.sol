@@ -1,4 +1,4 @@
-pragma solidity >=0.4.22 <0.7.0;
+pragma solidity ^0.7.2;
 
 import "./AuthContract.sol";
 
@@ -51,7 +51,7 @@ contract GeneralContract {
 
     /* -- ADMIN FUNCTIONS -- */
 
-    function rmUser(address _addr, string _id) public isAdmin {
+    function rmUser(address _addr, string memory _id) public isAdmin {
         // _addr = id2a[_id]
         userList[_addr].auth.terminate();
         userList[_addr].isNull = false;
@@ -61,7 +61,7 @@ contract GeneralContract {
         userList[_addr].id = "";
     }
 
-    function addUser(address _addr, string _id) public isAdmin {
+    function addUser(address _addr, string memory _id) public isAdmin {
         userList[_addr].auth = AuthContract(_addr);
         userList[_addr].isNull = true;
         userList[_addr].isAdmin = false;
@@ -83,15 +83,15 @@ contract GeneralContract {
     function getOTP() public isUser userNotLocked returns(uint16 pass_){
         require (userList[msg.sender].isLoggedIn == false, "Only offline users can ask for a key");
         // We call that specific contract function
-        pass_ = userList[msg.sender].Contract.newOTP();
+        pass_ = userList[msg.sender].auth.newOTP();
     }
 
     function tryLogin(uint16 _pass) public isUser userNotLocked {
         // We call that specific contract function
-        require(userList[_addr].isLoggedIn == false, "You are already logged in");
+        require(userList[msg.sender].isLoggedIn == false, "You are already logged in");
         
         // Every time an attempt is made, the count is increased
-        try userList[msg.sender].Contract.tryLogin(_pass){
+        try userList[msg.sender].auth.tryLogin(_pass){
             // Successful login
             userList[msg.sender].attempts = 0;
         }
@@ -101,13 +101,13 @@ contract GeneralContract {
         }
     }
     
-    function amILocked() isUser returns (bool locked){
+    function amILocked() public view isUser returns (bool locked){
         locked = (userList[msg.sender].attempts < 3);
     }
 
     function tryLogout() public isUser {
         // Can only logout if logged in
-        require(userList[_addr].isLoggedIn == true, "You are not logged in");
-        userList[_addr].auth.logout();
+        require(userList[msg.sender].isLoggedIn == true, "You are not logged in");
+        userList[msg.sender].isLoggedIn = false;
     }
 }
