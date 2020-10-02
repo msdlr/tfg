@@ -11,6 +11,7 @@ contract GeneralContract {
             bool isLoggedIn;
             bool isAdmin;
             AuthContract auth;
+            int8 attempts;
     }
     /* EVENTS */
     event createAdmin(address _adm, address _who);
@@ -24,6 +25,11 @@ contract GeneralContract {
     modifier isAdmin() {
         require(!userList[msg.sender].isNull, "This user is not in the system.");
         require(userList[msg.sender].isAdmin, "This user does not have admin. priviledges.");
+        _;
+    }
+
+    modifier userNotBlocked{
+        require (userList[msg.sender].attempts < 3);
         _;
     }
 
@@ -74,15 +80,29 @@ contract GeneralContract {
     }
 
     /* -- USER FUNCTIONS (WRAPPERS)-- */
-    function getOTP() public isUser returns(uint16 pass_){
+    function getOTP() public isUser userNotBlocked returns(uint16 pass_){
+        require (userList[msg.sender].isLoggedIn == false, "Only offline users can ask for a key");
         // We call that specific contract function
         pass_ = userList[msg.sender].Contract.newOTP();
     }
 
-    function tryLogin(uint16 _pass) public isUser {
+    function tryLogin(uint16 _pass) public isUser userNotBlocked {
         // We call that specific contract function
         require(userList[_addr].isLoggedIn == false, "You are already logged in");
-        userList[msg.sender].Contract.tryLogin(_pass);
+        
+        // Every time an attempt is made, the count is increased
+        try userList[msg.sender].Contract.tryLogin(_pass){
+            // Successful login
+            userList[msg.sender].attempts = 0;
+        }
+        catch {
+            // Failed attempt
+            userList[msg.sender].attempts++;
+        }
+    }
+    
+    function amILocked() isUser returns (bool locked){
+        locked = (userList[msg.sender].attempts < 3);
     }
 
     function tryLogout() public isUser {
