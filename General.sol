@@ -13,7 +13,7 @@ contract GeneralContract {
             AuthContract auth;
     }
     /* EVENTS */
-    event createAdmin(address _adm, address _who, uint256 t);
+    event createAdmin(address _adm, address _who);
 
     /* MODIFIERS */
     modifier isUser() {
@@ -70,17 +70,17 @@ contract GeneralContract {
         // We update the user's profile with admin status
         userList[_addr].isAdmin = true;
         // We notify in the blockchain who did it
-        emit createAdmin(_addr, msg.sender, now);
+        emit createAdmin(_addr, msg.sender);
     }
 
     /* -- USER FUNCTIONS (WRAPPERS)-- */
     function getOTP() public isUser returns(uint16 pass_){
-        // We call that specific contract function 
+        // We call that specific contract function
         pass_ = userList[msg.sender].Contract.newOTP();
     }
 
     function tryLogin(uint16 _pass) public isUser {
-        // We call that specific contract function 
+        // We call that specific contract function
         userList[msg.sender].Contract.tryLogin(_pass);
     }
 }
