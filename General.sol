@@ -40,13 +40,17 @@ contract GeneralContract {
 
     /* CONSTRUCTOR */
 
-    constructor(address owner_) public payable{
+    constructor(address owner_, string memory id_) public payable{
         // Set the owner of the company
         owner = owner_;
 
         // Add it to the admin list
         userList[owner].isRegistered = false;
         userList[owner].adminStatus = true;
+        userList[owner].id = id_;
+        id2a[id_] = owner;
+        
+        // Others fields are initialized as default values (0, false)
     }
 
     /* -- ADMIN FUNCTIONS -- */
@@ -59,6 +63,7 @@ contract GeneralContract {
         userList[_addr].isLoggedIn = false;
         id2a[_id] = address(0);
         userList[_addr].id = "";
+        userList[_addr].attempts = 0;
     }
 
     function addUser(address _addr, string memory _id) public isAdmin {
@@ -68,6 +73,7 @@ contract GeneralContract {
         userList[_addr].isLoggedIn = false;
         userList[_addr].id = _id;
         id2a[_id] = _addr;
+        userList[_addr].attempts = 0;
     }
 
     function addAdmin(address _addr) public isAdmin {
