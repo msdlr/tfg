@@ -1,4 +1,4 @@
-pragma solidity ^0.7.2;
+pragma solidity >=0.4.22 <0.7.0;
 
 import "./AuthContract.sol";
 
@@ -9,9 +9,9 @@ contract GeneralContract {
             string id;
             bool isRegistered;
             bool isLoggedIn;
-            bool isAdmin;
+            bool adminStatus;
             AuthContract auth;
-            int8 attempts;
+            uint8 attempts;
     }
     /* EVENTS */
     event createAdmin(address _adm, address _who);
@@ -24,7 +24,7 @@ contract GeneralContract {
 
     modifier isAdmin() {
         require(!userList[msg.sender].isRegistered, "This user is not in the system.");
-        require(userList[msg.sender].isAdmin, "This user does not have admin. priviledges.");
+        require(userList[msg.sender].adminStatus, "This user does not have admin. priviledges.");
         _;
     }
 
@@ -34,19 +34,19 @@ contract GeneralContract {
     }
 
     /* Contract data */
-    mapping ( address => User) userList;
-    mapping ( string => address) id2a; // Index by id
-    address owner;
+    mapping ( address => User)  private userList ;
+    mapping ( string => address) private id2a; // Index by id
+    address private owner;
 
     /* CONSTRUCTOR */
 
-    constructor() public payable{
+    constructor(address owner_) public payable{
         // Set the owner of the company
-        owner = msg.sender;
+        owner = owner_;
 
         // Add it to the admin list
         userList[owner].isRegistered = false;
-        userList[owner].isAdmin = true;
+        userList[owner].adminStatus = true;
     }
 
     /* -- ADMIN FUNCTIONS -- */
@@ -55,7 +55,7 @@ contract GeneralContract {
         // _addr = id2a[_id]
         userList[_addr].auth.terminate();
         userList[_addr].isRegistered = false;
-        userList[_addr].isAdmin = false;
+        userList[_addr].adminStatus = false;
         userList[_addr].isLoggedIn = false;
         id2a[_id] = address(0);
         userList[_addr].id = "";
@@ -63,8 +63,8 @@ contract GeneralContract {
 
     function addUser(address _addr, string memory _id) public isAdmin {
         userList[_addr].auth = AuthContract(_addr);
-        userList[_addr].isRegistered = true;
-        userList[_addr].isAdmin = false;
+        userList[_addr].isRegistered = false;
+        userList[_addr].adminStatus = false;
         userList[_addr].isLoggedIn = false;
         userList[_addr].id = _id;
         id2a[_id] = _addr;
@@ -74,7 +74,7 @@ contract GeneralContract {
         // Check that the user is added
         require(userList[_addr].isRegistered == false,"User does not exist.");
         // We update the user's profile with admin status
-        userList[_addr].isAdmin = true;
+        userList[_addr].adminStatus = true;
         // We notify in the blockchain who did it
         emit createAdmin(_addr, msg.sender);
     }
@@ -109,5 +109,29 @@ contract GeneralContract {
         // Can only logout if logged in
         require(userList[msg.sender].isLoggedIn == true, "You are not logged in");
         userList[msg.sender].isLoggedIn = false;
+    }
+    
+    /* SETTERS / GETTERS */
+    function getOwner() public view returns(address owner_){
+        owner_ = owner;
+    }
+    
+    function setOwner(address _newOwner) public isAdmin{
+        owner = _newOwner;
+    }
+    
+    function getUser(address _addr) public view returns(string memory id_,
+            bool isRegistered_,
+            bool isLoggedIn_,
+            bool adminStatus_,
+            AuthContract auth_,
+            uint8 attempts_){
+                
+        id_ = userList[_addr].id;
+        isRegistered_ = userList[_addr].isRegistered;
+        isLoggedIn_ = userList[_addr].isLoggedIn;
+        adminStatus_ = userList[_addr].adminStatus;
+        auth_ = userList[_addr].auth;
+        attempts_ = userList[_addr].attempts;
     }
 }
