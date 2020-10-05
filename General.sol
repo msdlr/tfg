@@ -7,7 +7,7 @@ contract GeneralContract {
     /* STRUCTS */
     struct User {
             string id;
-            bool isNull;
+            bool isRegistered;
             bool isLoggedIn;
             bool isAdmin;
             AuthContract auth;
@@ -18,12 +18,12 @@ contract GeneralContract {
 
     /* MODIFIERS */
     modifier isUser() {
-        require(!userList[msg.sender].isNull, "This user is not in the system.");
+        require(!userList[msg.sender].isRegistered, "This user is not in the system.");
         _;
     }
 
     modifier isAdmin() {
-        require(!userList[msg.sender].isNull, "This user is not in the system.");
+        require(!userList[msg.sender].isRegistered, "This user is not in the system.");
         require(userList[msg.sender].isAdmin, "This user does not have admin. priviledges.");
         _;
     }
@@ -45,7 +45,7 @@ contract GeneralContract {
         owner = msg.sender;
 
         // Add it to the admin list
-        userList[owner].isNull = false;
+        userList[owner].isRegistered = false;
         userList[owner].isAdmin = true;
     }
 
@@ -54,7 +54,7 @@ contract GeneralContract {
     function rmUser(address _addr, string memory _id) public isAdmin {
         // _addr = id2a[_id]
         userList[_addr].auth.terminate();
-        userList[_addr].isNull = false;
+        userList[_addr].isRegistered = false;
         userList[_addr].isAdmin = false;
         userList[_addr].isLoggedIn = false;
         id2a[_id] = address(0);
@@ -63,7 +63,7 @@ contract GeneralContract {
 
     function addUser(address _addr, string memory _id) public isAdmin {
         userList[_addr].auth = AuthContract(_addr);
-        userList[_addr].isNull = true;
+        userList[_addr].isRegistered = true;
         userList[_addr].isAdmin = false;
         userList[_addr].isLoggedIn = false;
         userList[_addr].id = _id;
@@ -72,7 +72,7 @@ contract GeneralContract {
 
     function addAdmin(address _addr) public isAdmin {
         // Check that the user is added
-        require(userList[_addr].isNull == false,"User does not exist.");
+        require(userList[_addr].isRegistered == false,"User does not exist.");
         // We update the user's profile with admin status
         userList[_addr].isAdmin = true;
         // We notify in the blockchain who did it
