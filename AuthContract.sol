@@ -1,4 +1,4 @@
-pragma solidity ^0.7.2;
+pragma solidity >=0.4.22 <0.7.0;
 import "./General.sol";
 
 contract AuthContract {

@@ -116,6 +116,7 @@ contract GeneralContract {
         owner_ = owner;
     }
     
+<<<<<<< HEAD
     function setOwner(address _newOwner) public isAdmin{
         owner = _newOwner;
     }
@@ -133,5 +134,17 @@ contract GeneralContract {
         adminStatus_ = userList[_addr].adminStatus;
         auth_ = userList[_addr].auth;
         attempts_ = userList[_addr].attempts;
+=======
+    function changeOwner(address _newOwner) public isAdmin{
+        owner = _newOwner;
+    }
+    
+    function checkAdmin(address _addr) public view returns (bool b){
+        b = userList[_addr].isAdmin;
+    }
+    
+    function checkRegistered(address _addr) public view returns (bool b){
+        b = userList[_addr].isRegistered;
+>>>>>>> 772cbcc9dab0b46a64347b0056345a998ba8d19d
     }
 }
