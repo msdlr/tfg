@@ -81,7 +81,7 @@ contract GeneralContract {
 
     /* -- USER FUNCTIONS (WRAPPERS)-- */
     function getOTP() public isUser userNotLocked returns(uint16 pass_){
-        require (userList[msg.sender].isLoggedIn == false, "Only offline users can ask for a key");
+        require (userList[msg.sender].isLoggedIn == false, "Only offline users can get for a key");
         // We call that specific contract function
         pass_ = userList[msg.sender].auth.newOTP();
     }
@@ -116,35 +116,34 @@ contract GeneralContract {
         owner_ = owner;
     }
     
-<<<<<<< HEAD
     function setOwner(address _newOwner) public isAdmin{
         owner = _newOwner;
     }
     
-    function getUser(address _addr) public view returns(string memory id_,
-            bool isRegistered_,
-            bool isLoggedIn_,
-            bool adminStatus_,
-            AuthContract auth_,
-            uint8 attempts_){
-                
+    //Functions for retrieving the user struct fields
+    
+    function getUserId(address _addr) public view returns (string memory id_ ){
         id_ = userList[_addr].id;
-        isRegistered_ = userList[_addr].isRegistered;
-        isLoggedIn_ = userList[_addr].isLoggedIn;
-        adminStatus_ = userList[_addr].adminStatus;
-        auth_ = userList[_addr].auth;
-        attempts_ = userList[_addr].attempts;
-=======
-    function changeOwner(address _newOwner) public isAdmin{
-        owner = _newOwner;
     }
     
-    function checkAdmin(address _addr) public view returns (bool b){
-        b = userList[_addr].isAdmin;
-    }
-    
-    function checkRegistered(address _addr) public view returns (bool b){
+    function getUserRegistered(address _addr) public view returns (bool b){
         b = userList[_addr].isRegistered;
->>>>>>> 772cbcc9dab0b46a64347b0056345a998ba8d19d
     }
+    
+    function getUserLoggedIn(address _addr) public view returns (bool b){
+        b = userList[_addr].isLoggedIn;
+    }
+    
+    function getUserAdmin(address _addr) public view returns (bool b){
+        b = userList[_addr].adminStatus;
+    }
+    
+    function getUserContract(address _addr) public view returns (AuthContract auth_){
+        auth_ = userList[_addr].auth;
+    }
+    
+    function getUserAttempts(address _addr) public view returns (uint8 attempts_){
+        attempts_ = userList[_addr].attempts;
+    }
+    
 }
