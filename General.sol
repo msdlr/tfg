@@ -1,4 +1,4 @@
-pragma solidity ^0.7.2;
+pragma solidity >=0.4.22 <0.7.0;
 
 import "./AuthContract.sol";
 
@@ -40,9 +40,9 @@ contract GeneralContract {
 
     /* CONSTRUCTOR */
 
-    constructor() public payable{
+    constructor(address owner_) public payable{
         // Set the owner of the company
-        owner = msg.sender;
+        owner = owner_;
 
         // Add it to the admin list
         userList[owner].isRegistered = false;
@@ -63,7 +63,7 @@ contract GeneralContract {
 
     function addUser(address _addr, string memory _id) public isAdmin {
         userList[_addr].auth = AuthContract(_addr);
-        userList[_addr].isRegistered = true;
+        userList[_addr].isRegistered = false;
         userList[_addr].isAdmin = false;
         userList[_addr].isLoggedIn = false;
         userList[_addr].id = _id;
@@ -109,5 +109,22 @@ contract GeneralContract {
         // Can only logout if logged in
         require(userList[msg.sender].isLoggedIn == true, "You are not logged in");
         userList[msg.sender].isLoggedIn = false;
+    }
+    
+    /* SETTERS / GETTERS */
+    function getOwner() public view returns(address owner_){
+        owner_ = owner;
+    }
+    
+    function changeOwner(address _newOwner) public isAdmin{
+        owner = _newOwner;
+    }
+    
+    function checkAdmin(address _addr) public view returns (bool b){
+        b = userList[_addr].isAdmin;
+    }
+    
+    function checkRegistered(address _addr) public view returns (bool b){
+        b = userList[_addr].isRegistered;
     }
 }
