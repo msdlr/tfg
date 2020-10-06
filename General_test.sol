@@ -1,62 +1,86 @@
 pragma solidity >=0.4.22 <0.7.0;
-import "remix_tests.sol"; // this import is automatically injected by Remix.
-import "tfg/General.sol";
+import "./General.sol";
 
-// File name has to end with '_test.sol', this file can contain more than one testSuite contracts
-contract General_test {
-    
-    GeneralContract testContract;
-    //address tester = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4; // msg.sender
-    
-    address[] testAddrs = 
-    [0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2,
-    0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db,
-    0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB,
-    0x617F2E2fD72FD9D5503197092aC168c91465E7f2,
-    0x17F6AD8Ef982297579C203069C1DbfFE4348c372,
-    0x5c6B0f7Bf3E7ce046039Bd8FABdfD3f9F5021678,
-    0x03C6FcED478cBbC9a4FAB34eF9f40767739D1Ff7,
-    0x03C6FcED478cBbC9a4FAB34eF9f40767739D1Ff7,
-    0x0A098Eda01Ce92ff4A4CCb7A4fFFb5A43EBC70DC,
-    0xCA35b7d915458EF540aDe6068dFe2F44E8fa733c,
-    0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C,
-    0x4B0897b0513fdC7C541B6d9D7E929C4e5364D2dB,
-    0x583031D1113aD414F02576BD6afaBfb302140225,
-    0xdD870fA1b7C4700F2BD7f44238821C26f7392148];
-    
+contract AuthContract {
 
-    /// 'beforeAll' runs before all other tests
-    /// More special functions are: 'beforeEach', 'beforeAll', 'afterEach' & 'afterAll'
-    function beforeAll() public {
-        // Instantiate the contract to test
-        testContract = new GeneralContract(msg.sender, "11223344K");
+    // This contract is created by the administrators
+    // for every person that use the login system
+
+    /* STRUCTS */
+    struct OTP {
+        bytes32 passHash;
+        // Timestamp relative to today
+        uint24 time; // seconds in a day: 2 ^ 16.39
+        bool isUsed;
+        uint16 ttl;
+        // The OTP can expire the next day it's issued (p.e. 00:01)
+        uint32 date; // 2^32 days is about 136 years
     }
-    
-    function checkFirstAdmin() public {
-        // Check that the constructor executed correctly
-        Assert.equal(msg.sender, testContract.getOwner(), "owner address should be this caller");
-        
-        // Check if the fields initialized correctly
-        Assert.equal(testContract.getUserAdmin(msg.sender),true,"caller was not made admin");
-        Assert.equal(testContract.getUserRegistered(msg.sender),false,"caller is not on the user list");
-        Assert.equal(testContract.getUserLoggedIn(msg.sender),false,"caller is not on the user list");
-        
+
+    /* MODIFIERS */
+ 
+    modifier onlyContract{
+        require(msg.sender == address(gc),"can only be called from the company contract");
+        _;
     }
-    
-    function addUser() public {
-        
-        // Try to add a new user
-        //Assert.equal(testContract.checkRegistered(testAddrs[0]),false,"User entry (isRegistered) should be FALSE");
-        //testContract.addUser(testAddrs[0], "11223344K");
-        
-        // Check it was done correctly
-        //Assert.equal(testContract.checkRegistered(testAddrs[0]),false,"User entry (isRegistered) should be TRUE");
+
+    modifier validOTP{
+        require(eOTP.isUsed == false);
+        require( (eOTP.date * 1 days) + (eOTP.ttl * 1 seconds) == (getToday() * 1 days) + (secondOfDay() * 1 seconds));
+        _;
     }
-    
-    function removeUser() public {
-        
+
+    /* STATUS VARIABLES */
+    GeneralContract gc;
+    address employee;
+    OTP eOTP;
+
+    constructor (GeneralContract _genContract, address _employee) public payable{
+        // Set status data
+        gc = _genContract;
+        employee = _employee;
+        // Generate an invalid token
+        eOTP = OTP(0,0,true,0,0);
     }
-    
-    
-    
+
+    /* FUNCTIONS */
+    function tryLogin(uint16 _pass) public view validOTP {
+        // We just revert if the OTP is not valid
+        require (keccak256(abi.encode(_pass)) == eOTP.passHash, "The password is not correct");
+    }
+
+    // Returns the generated pass and generate the OTP struture
+    function newOTP() public onlyContract returns (uint16 pass_){
+        // Generate the OTP number
+        uint16 p = uint16(uint256(keccak256(abi.encode(block.timestamp, msg.sender))) % 9998) +1;
+
+        //Fill the OTP fields:
+        // Timestamp: relative to today instead of 1970
+        eOTP.time = uint24(block.timestamp % 1 days); // Timestamp relative to the day
+        // TTL
+        eOTP.ttl = uint16(5 minutes);
+        // OTP day
+        eOTP.date = getToday();
+        // Used flag
+        eOTP.isUsed = false;
+        // Pass Hash
+        eOTP.passHash = keccak256(abi.encode(p));
+        
+        // Return p to be retreived by the interface
+        return p;
+    }
+
+    function terminate() external onlyContract{
+        // We already require that msg.sender is the general contract
+        selfdestruct(msg.sender);
+    }
+
+    //Day number since 1/1/2020 (UNIX time + 50 years)
+    function getToday() private view returns(uint8 today){
+        uint day = (block.timestamp / 1 days) - (50*365 days);
+        return uint8(day);
+    }
+    function secondOfDay() private view returns(uint24 sec){
+        sec = uint24(block.timestamp % getToday());
+    }
 }

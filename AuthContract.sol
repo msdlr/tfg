@@ -52,7 +52,7 @@ contract AuthContract {
     // Returns the generated pass and generate the OTP struture
     function newOTP() public onlyContract returns (uint16 pass_){
         // Generate the OTP number
-        uint16 p = uint16(uint256(keccak256(abi.encode(block.timestamp, msg.sender))) % 9999);
+        uint16 p = uint16(uint256(keccak256(abi.encode(block.timestamp, msg.sender))) % 9998) +1;
 
         //Fill the OTP fields:
         // Timestamp: relative to today instead of 1970
