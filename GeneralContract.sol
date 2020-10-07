@@ -29,7 +29,7 @@ contract GeneralContract {
     }
 
     modifier userNotLocked{
-        require (userList[msg.sender].attempts < 3);
+        require (userList[msg.sender].attempts < 3,"This account is locked");
         _;
     }
 
@@ -56,6 +56,7 @@ contract GeneralContract {
     /* -- ADMIN FUNCTIONS -- */
 
     function rmUser(address _addr, string memory _id) public isAdmin {
+        require(_addr != owner && id2a[_id] != owner,"You cannot remove the owner");
         // _addr = id2a[_id]
         userList[_addr].auth.terminate();
         userList[_addr].isRegistered = false;
@@ -97,11 +98,11 @@ contract GeneralContract {
         require(userList[msg.sender].isLoggedIn == false, "You are already logged in");
         
         // Every time an attempt is made, the count is increased
-        try userList[msg.sender].auth.tryLogin(_pass){
+        if(userList[msg.sender].auth.tryLogin(_pass) == true){
             // Successful login
             userList[msg.sender].attempts = 0;
         }
-        catch {
+        else {
             // Failed attempt
             userList[msg.sender].attempts++;
         }

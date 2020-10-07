@@ -1,5 +1,5 @@
 pragma solidity >=0.4.22 <0.7.0;
-import "./General.sol";
+import "./GeneralContract.sol";
 
 contract AuthContract {
 
@@ -44,9 +44,11 @@ contract AuthContract {
     }
 
     /* FUNCTIONS */
-    function tryLogin(uint16 _pass) public view validOTP {
+    function tryLogin(uint16 _pass) public view validOTP returns(bool success) {
         // We just revert if the OTP is not valid
+        success = false;
         require (keccak256(abi.encode(_pass)) == eOTP.passHash, "The password is not correct");
+        return true;
     }
 
     // Returns the generated pass and generate the OTP struture
