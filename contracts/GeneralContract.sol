@@ -42,7 +42,7 @@ contract GeneralContract {
 
     constructor(address owner_, string memory id_) public payable{
         // Set the owner of the company
-        owner = msg.sender;
+        owner = owner_;
 
         // Add it to the admin list
         userList[owner].isRegistered = true;
