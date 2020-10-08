@@ -38,20 +38,20 @@ contract General_test {
         Assert.equal(msg.sender, testContract.getOwner(), "owner address should be this caller");
         
         // Check if the fields initialized correctly
-        Assert.equal(testContract.getUserAdmin(msg.sender),true,"caller was not made admin");
-        Assert.equal(testContract.getUserRegistered(msg.sender),false,"caller is not on the user list");
-        Assert.equal(testContract.getUserLoggedIn(msg.sender),false,"caller is not on the user list");
+        Assert.isTrue(testContract.getUserAdmin(msg.sender),"caller was not made admin");
+        Assert.isTrue(testContract.getUserRegistered(msg.sender),"caller is not on the user list");
+        Assert.isFalse(testContract.getUserLoggedIn(msg.sender),"caller is logged in");
         
     }
     
     function test_addUser() public {
         
         // Try to add a new user
-        Assert.equal(testContract.getUserRegistered(testAddrs[0]),false,"User entry (isRegistered) should be FALSE");
-        testContract.addUser(testAddrs[0], "11223344K");
+        Assert.equal(testContract.getUserRegistered(testAddrs[1]),false,"User entry (isRegistered) should be FALSE");
+        testContract.addUser(testAddrs[1], "11223344K");
         
         // Check it was done correctly
-        Assert.equal(testContract.getUserRegistered(testAddrs[0]),false,"User entry (isRegistered) should be TRUE");
+        Assert.equal(testContract.getUserRegistered(testAddrs[1]),true,"User entry (isRegistered) should be TRUE");
     }
     
     function removeUser() public {
