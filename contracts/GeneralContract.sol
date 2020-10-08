@@ -17,12 +17,12 @@ contract GeneralContract {
     event createAdmin(address _adm, address _who);
 
     /* MODIFIERS */
-    modifier isUser() {
-        require(!userList[msg.sender].isRegistered, "This user is not in the system.");
+    modifier onlyRegistered() {
+        require(userList[msg.sender].isRegistered, "This user is not in the system.");
         _;
     }
 
-    modifier isAdmin() {
+    modifier onlyAdmin() {
         require(userList[msg.sender].isRegistered, "This user is not in the system.");
         require(userList[msg.sender].adminStatus, "This user does not have admin. priviledges.");
         _;
@@ -42,7 +42,7 @@ contract GeneralContract {
 
     constructor(address owner_, string memory id_) public payable{
         // Set the owner of the company
-        owner = owner_;
+        owner = msg.sender;
 
         // Add it to the admin list
         userList[owner].isRegistered = true;
@@ -55,7 +55,7 @@ contract GeneralContract {
 
     /* -- ADMIN FUNCTIONS -- */
 
-    function rmUser(address _addr, string memory _id) public isAdmin {
+    function rmUser(address _addr, string memory _id) public onlyAdmin {
         require(_addr != owner && id2a[_id] != owner,"You cannot remove the owner");
         // _addr = id2a[_id]
         userList[_addr].auth.terminate();
@@ -67,7 +67,7 @@ contract GeneralContract {
         userList[_addr].attempts = 0;
     }
 
-    function addUser(address _addr, string memory _id) public isAdmin {
+    function addUser(address _addr, string memory _id) public onlyAdmin {
         userList[_addr].auth = AuthContract(_addr);
         userList[_addr].isRegistered = true;
         userList[_addr].adminStatus = false;
@@ -77,9 +77,9 @@ contract GeneralContract {
         userList[_addr].attempts = 0;
     }
 
-    function addAdmin(address _addr) public isAdmin {
+    function addAdmin(address _addr) public onlyAdmin {
         // Check that the user is added
-        require(userList[_addr].isRegistered == false,"User does not exist.");
+        require(userList[_addr].isRegistered == true,"User does not exist.");
         // We update the user's profile with admin status
         userList[_addr].adminStatus = true;
         // We notify in the blockchain who did it
@@ -87,13 +87,13 @@ contract GeneralContract {
     }
 
     /* -- USER FUNCTIONS (WRAPPERS)-- */
-    function getOTP() public isUser userNotLocked returns(uint16 pass_){
+    function getOTP() public onlyRegistered userNotLocked returns(uint16 pass_){
         require (userList[msg.sender].isLoggedIn == false, "Only offline users can get for a key");
         // We call that specific contract function
         pass_ = userList[msg.sender].auth.newOTP();
     }
 
-    function tryLogin(uint16 _pass) public isUser userNotLocked {
+    function tryLogin(uint16 _pass) public onlyRegistered userNotLocked {
         // We call that specific contract function
         require(userList[msg.sender].isLoggedIn == false, "You are already logged in");
         
@@ -108,11 +108,11 @@ contract GeneralContract {
         }
     }
     
-    function amILocked() public view isUser returns (bool locked){
+    function amILocked() public view onlyRegistered returns (bool locked){
         locked = (userList[msg.sender].attempts > 3);
     }
 
-    function tryLogout() public isUser {
+    function tryLogout() public onlyRegistered {
         // Can only logout if logged in
         require(userList[msg.sender].isLoggedIn == true, "You are not logged in");
         userList[msg.sender].isLoggedIn = false;
