@@ -28,12 +28,9 @@ contract General_test {
 
     /// 'beforeAll' runs before all other tests
     /// More special functions are: 'beforeEach', 'beforeAll', 'afterEach' & 'afterAll'
-    function beforeAll() public {
+    function test_createContract() public {
         // Instantiate the contract to test
         testContract = new GeneralContract(msg.sender, "11223344K");
-    }
-    
-    function test_checkFirstAdmin() public {
         // Check that the constructor executed correctly
         Assert.equal(msg.sender, testContract.getOwner(), "owner address should be this caller");
         
@@ -41,7 +38,6 @@ contract General_test {
         Assert.isTrue(testContract.getUserAdmin(msg.sender),"caller was not made admin");
         Assert.isTrue(testContract.getUserRegistered(msg.sender),"caller is not on the user list");
         Assert.isFalse(testContract.getUserLoggedIn(msg.sender),"caller is logged in");
-        
     }
     
     function test_addUser() public {
