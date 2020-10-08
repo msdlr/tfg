@@ -23,7 +23,7 @@ contract GeneralContract {
     }
 
     modifier isAdmin() {
-        require(!userList[msg.sender].isRegistered, "This user is not in the system.");
+        require(userList[msg.sender].isRegistered, "This user is not in the system.");
         require(userList[msg.sender].adminStatus, "This user does not have admin. priviledges.");
         _;
     }
@@ -45,7 +45,7 @@ contract GeneralContract {
         owner = owner_;
 
         // Add it to the admin list
-        userList[owner].isRegistered = false;
+        userList[owner].isRegistered = true;
         userList[owner].adminStatus = true;
         userList[owner].id = id_;
         id2a[id_] = owner;
@@ -69,7 +69,7 @@ contract GeneralContract {
 
     function addUser(address _addr, string memory _id) public isAdmin {
         userList[_addr].auth = AuthContract(_addr);
-        userList[_addr].isRegistered = false;
+        userList[_addr].isRegistered = true;
         userList[_addr].adminStatus = false;
         userList[_addr].isLoggedIn = false;
         userList[_addr].id = _id;
@@ -120,37 +120,42 @@ contract GeneralContract {
     
     /* SETTERS / GETTERS */
     function getOwner() public view returns(address owner_){
-        owner_ = owner;
+        return owner;
     }
     
-    function setOwner(address _newOwner) public isAdmin{
+    function setOwner(address _newOwner) public{
+        require(msg.sender == owner,"Only the owner can do this");
         owner = _newOwner;
     }
     
     //Functions for retrieving the user struct fields
     
-    function getUserId(address _addr) public view returns (string memory id_ ){
-        id_ = userList[_addr].id;
+    function getContractAddress() public view returns (address){
+        return address(this);
+    }
+
+    function getUserId(address _addr) public view returns (string memory){
+        return userList[_addr].id;
     }
     
-    function getUserRegistered(address _addr) public view returns (bool b){
-        b = userList[_addr].isRegistered;
+    function getUserRegistered(address _addr) public view returns (bool){
+        return userList[_addr].isRegistered;
     }
     
-    function getUserLoggedIn(address _addr) public view returns (bool b){
-        b = userList[_addr].isLoggedIn;
+    function getUserLoggedIn(address _addr) public view returns (bool){
+        return userList[_addr].isLoggedIn;
     }
     
-    function getUserAdmin(address _addr) public view returns (bool b){
-        b = userList[_addr].adminStatus;
+    function getUserAdmin(address _addr) public view returns (bool){
+        return userList[_addr].adminStatus;
     }
     
-    function getUserContract(address _addr) public view returns (AuthContract auth_){
-        auth_ = userList[_addr].auth;
+    function getUserContract(address _addr) public view returns (AuthContract){
+        return userList[_addr].auth;
     }
     
-    function getUserAttempts(address _addr) public view returns (uint8 attempts_){
-        attempts_ = userList[_addr].attempts;
+    function getUserAttempts(address _addr) public view returns (uint8){
+        return userList[_addr].attempts;
     }
     
 }
