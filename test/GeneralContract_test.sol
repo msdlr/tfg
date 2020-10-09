@@ -7,9 +7,8 @@ import "../contracts/GeneralContract.sol";
 contract General_test {
     
     GeneralContract testContract;
-    //address tester = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4; // msg.sender
-    address thisContract = msg.sender;
-    AuthContract thisAuth;
+    address thisContract = address(this);
+    address me = msg.sender;
     
     address[] testAddrs = 
     [0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2,
@@ -52,5 +51,15 @@ contract General_test {
         Assert.isFalse(testContract.getUserLoggedIn(thisContract), "caller should not be logged in");
         Assert.isTrue(testContract.getUserAdmin(thisContract), "caller should be admin");
         Assert.equal(uint(0), uint(testContract.getUserAttempts(thisContract)), "attempts should be 0");
+    }
+
+    function test_addUser() public {
+        
+        // Try to add a new user
+        Assert.isFalse(testContract.getUserRegistered(testAddrs[0]),"User entry (isRegistered) should be FALSE");
+        testContract.addUser(testAddrs[0], "11223344K");
+        
+        // Check it was done correctly
+        Assert.isTrue(testContract.getUserRegistered(testAddrs[0]),"User entry (isRegistered) should be TRUE");
     }
 }
