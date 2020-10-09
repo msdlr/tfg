@@ -28,32 +28,17 @@ contract General_test {
 
     /// 'beforeAll' runs before all other tests
     /// More special functions are: 'beforeEach', 'beforeAll', 'afterEach' & 'afterAll'
+
+    // msg.sender 
     function test_createContract() public {
         // Instantiate the contract to test
-        testContract = new GeneralContract(msg.sender, "11223344K");
+        testContract = new GeneralContract(address(this), "11223344K");
         // Check that the constructor executed correctly
-        Assert.equal(msg.sender, testContract.getOwner(), "owner address should be this caller");
+        Assert.equal(address(this), testContract.getOwner(), "owner address should be this caller");
         
         // Check if the fields initialized correctly
-        Assert.isTrue(testContract.getUserAdmin(msg.sender),"caller was not made admin");
-        Assert.isTrue(testContract.getUserRegistered(msg.sender),"caller is not on the user list");
-        Assert.isFalse(testContract.getUserLoggedIn(msg.sender),"caller is logged in");
+        Assert.isTrue(testContract.getUserAdmin(address(this)),"caller was not made admin");
+        Assert.isTrue(testContract.getUserRegistered(address(this)),"caller is not on the user list");
+        Assert.isFalse(testContract.getUserLoggedIn(address(this)),"caller is logged in");
     }
-    
-    function test_addUser() public {
-        
-        // Try to add a new user
-        Assert.equal(testContract.getUserRegistered(testAddrs[1]),false,"User entry (isRegistered) should be FALSE");
-        testContract.addUser(testAddrs[1], "11223344K");
-        
-        // Check it was done correctly
-        Assert.equal(testContract.getUserRegistered(testAddrs[1]),true,"User entry (isRegistered) should be TRUE");
-    }
-    
-    function removeUser() public {
-        
-    }
-    
-    
-    
 }
