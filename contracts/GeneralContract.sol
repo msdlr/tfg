@@ -14,7 +14,7 @@ contract GeneralContract {
             uint8 attempts;
     }
     /* EVENTS */
-    event createAdmin(address _adm, address _who);
+    event promoteEvent(address _adm, address _who);
 
     /* MODIFIERS */
     modifier onlyRegistered() {
@@ -83,7 +83,7 @@ contract GeneralContract {
         // We update the user's profile with admin status
         userList[_addr].adminStatus = true;
         // We notify in the blockchain who did it
-        emit createAdmin(_addr, msg.sender);
+        emit promoteEvent(_addr, msg.sender);
     }
 
     /* -- USER FUNCTIONS (WRAPPERS)-- */
