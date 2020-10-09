@@ -71,8 +71,8 @@ contract GeneralContract {
 
     function addUser(address _addr, string memory _id) public onlyAdmin {
         require(userList[_addr].isRegistered == false,"User is already registered.");
-        require(id2a[_id] != address(0),"Id is already taken");
-        userList[_addr].auth = AuthContract(_addr);
+        require(id2a[_id] == address(0),"Id is already taken");
+        userList[_addr].auth = new AuthContract(this, _addr);
         userList[_addr].isRegistered = true;
         userList[_addr].adminStatus = false;
         userList[_addr].isLoggedIn = false;
