@@ -18,13 +18,13 @@ contract GeneralContract {
 
     /* MODIFIERS */
     modifier onlyRegistered() {
-        require(userList[msg.sender].isRegistered, "This user is not in the system.");
+        require(userList[msg.sender].isRegistered, "Caller is not in the system.");
         _;
     }
 
     modifier onlyAdmin() {
-        require(userList[msg.sender].isRegistered, "This user is not in the system.");
-        require(userList[msg.sender].adminStatus, "This user does not have admin. priviledges.");
+        require(userList[msg.sender].isRegistered, "Caller is not in the system.");
+        require(userList[msg.sender].adminStatus, "Caller does not have admin. priviledges.");
         _;
     }
 
