@@ -151,6 +151,10 @@ contract GeneralContract {
         return userList[_addr].id;
     }
     
+    function getUserAddress(string memory _id) public view returns (address){
+        return id2a[_id];
+    }
+
     function getUserRegistered(address _addr) public view returns (bool){
         return userList[_addr].isRegistered;
     }
