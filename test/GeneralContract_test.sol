@@ -8,6 +8,8 @@ contract General_test {
     
     GeneralContract testContract;
     //address tester = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4; // msg.sender
+    address thisContract = msg.sender;
+    AuthContract thisAuth;
     
     address[] testAddrs = 
     [0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2,
@@ -29,16 +31,26 @@ contract General_test {
     /// 'beforeAll' runs before all other tests
     /// More special functions are: 'beforeEach', 'beforeAll', 'afterEach' & 'afterAll'
 
-    // msg.sender 
+    // msg.sender in GeneralContract -> address (this)
     function test_createContract() public {
         // Instantiate the contract to test
-        testContract = new GeneralContract(address(this), "11223344K");
+        testContract = new GeneralContract(thisContract, "11223344K");
         // Check that the constructor executed correctly
-        Assert.equal(address(this), testContract.getOwner(), "owner address should be this caller");
+        Assert.equal(thisContract, testContract.getOwner(), "owner address should be this caller");
         
         // Check if the fields initialized correctly
-        Assert.isTrue(testContract.getUserAdmin(address(this)),"caller was not made admin");
-        Assert.isTrue(testContract.getUserRegistered(address(this)),"caller is not on the user list");
-        Assert.isFalse(testContract.getUserLoggedIn(address(this)),"caller is logged in");
+        Assert.isTrue(testContract.getUserAdmin(thisContract),"caller was not made admin");
+        Assert.isTrue(testContract.getUserRegistered(thisContract),"caller is not on the user list");
+        Assert.isFalse(testContract.getUserLoggedIn(thisContract),"caller is logged in");
+        Assert.equal("11223344K", testContract.getUserId(thisContract), "contract id was not set");
+    }
+
+    function test_getters() public {
+        Assert.equal(address(testContract), testContract.getContractAddress(), "contract address differs");
+        Assert.equal("11223344K", testContract.getUserId(thisContract), "id differs");
+        Assert.isTrue(testContract.getUserRegistered(thisContract), "caller not registered");
+        Assert.isFalse(testContract.getUserLoggedIn(thisContract), "caller should not be logged in");
+        Assert.isTrue(testContract.getUserAdmin(thisContract), "caller should be admin");
+        Assert.equal(uint(0), uint(testContract.getUserAttempts(thisContract)), "attempts should be 0");
     }
 }
