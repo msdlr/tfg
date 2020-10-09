@@ -77,7 +77,7 @@ contract GeneralContract {
         userList[_addr].attempts = 0;
     }
 
-    function addAdmin(address _addr) public onlyAdmin {
+    function promoteUser(address _addr) public onlyAdmin {
         // Check that the user is added
         require(userList[_addr].isRegistered == true,"User does not exist.");
         // We update the user's profile with admin status
