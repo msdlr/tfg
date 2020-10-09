@@ -15,6 +15,7 @@ contract GeneralContract {
     }
     /* EVENTS */
     event promoteEvent(address _adm, address _who);
+    event demoteEvent(address _adm, address _who);
 
     /* MODIFIERS */
     modifier onlyRegistered() {
@@ -84,6 +85,15 @@ contract GeneralContract {
         userList[_addr].adminStatus = true;
         // We notify in the blockchain who did it
         emit promoteEvent(_addr, msg.sender);
+    }
+
+    function demoteAdmin(address _addr) public onlyAdmin {
+                // Check that the user is added
+        require(userList[_addr].isRegistered == true,"User does not exist.");
+        // We update the user's profile with admin status
+        userList[_addr].adminStatus = false;
+        // We notify in the blockchain who did it
+        emit demoteEvent(_addr, msg.sender);
     }
 
     /* -- USER FUNCTIONS (WRAPPERS)-- */

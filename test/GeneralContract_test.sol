@@ -70,5 +70,11 @@ contract General_test {
         Assert.isTrue(testContract.getUserAdmin(testAddrs[0]),"User entry (adminStatus) should be FALSE");
     }
 
+    function test_demoteUser() public {
+        Assert.isTrue(testContract.getUserAdmin(testAddrs[0]),"User entry (adminStatus) should be FALSE");
+        testContract.demoteAdmin(testAddrs[0]);
+        Assert.isFalse(testContract.getUserAdmin(testAddrs[0]),"User entry (adminStatus) should be FALSE");
+    }
+
     
 }
