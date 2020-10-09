@@ -51,6 +51,7 @@ contract General_test {
         Assert.isFalse(testContract.getUserLoggedIn(thisContract), "caller should not be logged in");
         Assert.isTrue(testContract.getUserAdmin(thisContract), "caller should be admin");
         Assert.equal(uint(0), uint(testContract.getUserAttempts(thisContract)), "attempts should be 0");
+        Assert.isFalse(testContract.amILocked(), "should return false");
     }
 
     function test_addUser() public {
@@ -62,4 +63,12 @@ contract General_test {
         // Check it was done correctly
         Assert.isTrue(testContract.getUserRegistered(testAddrs[0]),"User entry (isRegistered) should be TRUE");
     }
+
+    function test_promoteUser() public {
+        Assert.isFalse(testContract.getUserAdmin(testAddrs[0]),"User entry (adminStatus) should be FALSE");
+        testContract.promoteUser(testAddrs[0]);
+        Assert.isTrue(testContract.getUserAdmin(testAddrs[0]),"User entry (adminStatus) should be FALSE");
+    }
+
+    
 }
