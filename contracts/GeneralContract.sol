@@ -58,6 +58,7 @@ contract GeneralContract {
 
     function rmUser(address _addr, string memory _id) public onlyAdmin {
         require(_addr != owner && id2a[_id] != owner,"You cannot remove the owner");
+        require(id2a[_id] == _addr,"Address and Id do not correspond");
         // _addr = id2a[_id]
         userList[_addr].auth.terminate();
         userList[_addr].isRegistered = false;
@@ -69,6 +70,8 @@ contract GeneralContract {
     }
 
     function addUser(address _addr, string memory _id) public onlyAdmin {
+        require(userList[_addr].isRegistered == false,"User is already registered.");
+        require(id2a[_id] != address(0),"Id is already taken");
         userList[_addr].auth = AuthContract(_addr);
         userList[_addr].isRegistered = true;
         userList[_addr].adminStatus = false;
