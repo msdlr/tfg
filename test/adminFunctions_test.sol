@@ -68,7 +68,4 @@ contract GeneralContract_Admintest {
         Assert.isFalse(testContract.getUserLoggedIn(testAddrs[0]), "isLoggedIn field not cleared after removal");
         Assert.equal(uint(0),uint(testContract.getUserAttempts(testAddrs[0])), "attempts field not cleared after removal");
     }
-    
-
-    
 }
