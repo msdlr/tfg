@@ -2,4 +2,4 @@
 
 command -v entr || (echo "install entr"; exit)
 
-ls ./*sol | entr truffle test
+ls contracts/*sol test/*sol | entr truffle test
