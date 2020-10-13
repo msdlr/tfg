@@ -114,6 +114,7 @@ contract GeneralContract {
         if(userList[msg.sender].auth.tryLogin(_pass) == true){
             // Successful login
             userList[msg.sender].attempts = 0;
+            userList[msg.sender].isLoggedIn = true;
         }
         else {
             // Failed attempt
