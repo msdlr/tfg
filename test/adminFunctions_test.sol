@@ -1,4 +1,5 @@
-pragma solidity >=0.4.22 <0.7.0;
+pragma solidity >=0.6.4 <=7.3.0;
+
 import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
 import "../contracts/GeneralContract.sol";

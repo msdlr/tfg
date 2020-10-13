@@ -1,4 +1,4 @@
-pragma solidity >=0.4.22 <0.7.0;
+pragma solidity >=0.6.4 <=7.3.0;
 
 import "./AuthContract.sol";
 
@@ -50,7 +50,7 @@ contract GeneralContract {
         userList[owner].adminStatus = true;
         userList[owner].id = id_;
         id2a[id_] = owner;
-        
+        //userList[owner].auth = new AuthContract(this, owner);
         // Others fields are initialized as default values (0, false)
     }
 
