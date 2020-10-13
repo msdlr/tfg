@@ -15,7 +15,7 @@ contract AuthContract {
         bool valid;
         uint16 ttl;
         // The OTP can expire the next day it's issued (p.e. 00:01)
-        uint8 date; // 2^32 days is about 136 years
+        uint16 date; // 2^16 days is about 179  years
     }
 
     /* MODIFIERS */
@@ -27,7 +27,6 @@ contract AuthContract {
 
     modifier validOTP{
         require(eOTP.valid == true, "This OTP is not valid");
-        // (day since 1/1/2020 + ttl)
         require((eOTP.date) * 1 days + secondOfDay() + (eOTP.ttl) > getToday() * 1 days + secondOfDay(), "timestamp expired");
         _;
     }
@@ -80,9 +79,9 @@ contract AuthContract {
     }
 
     //Day number since 1/1/2020 (UNIX time + 50 years)
-    function getToday() private view returns(uint8 today){
+    function getToday() private view returns(uint16 today){
         uint day = (block.timestamp / 1 days) - (50*365 days);
-        return uint8(day);
+        return uint16(day);
     }
     function secondOfDay() private view returns(uint24 sec){
         sec = uint24(block.timestamp % getToday());

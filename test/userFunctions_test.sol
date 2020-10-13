@@ -33,11 +33,9 @@ contract userFunctions_test{
         Assert.isTrue(pass != uint16(0),"[test_getOTP] Pass not retrieved");
     }
 
-    //function test_trylogin() public {
-    //    //testContract.tryLogin(pass);
-    //    ac.tryLogin(pass);
-    //    
-    //    //Assert.isTrue(testContract.getUserLoggedIn(thisContract),"[test_trylogin] user was not logged in");
-    //    //Assert.isTrue(testContract.getUserAttempts(thisContract) == 0,"[test_trylogin] user was not logged in");
-    //}
+    function test_trylogin() public {
+        testContract.tryLogin(pass);
+        Assert.isTrue(testContract.getUserLoggedIn(thisContract),"[test_trylogin] user was not logged in");
+        Assert.isTrue(testContract.getUserAttempts(thisContract) == 0,"[test_trylogin] user was not logged in");
+    }
 }
