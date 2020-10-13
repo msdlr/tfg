@@ -167,7 +167,7 @@ contract GeneralContract {
         return userList[_addr].adminStatus;
     }
     
-    function getUserContract(address _addr) public view returns (AuthContract){
+    function getUserAuthContract(address _addr) public view returns (AuthContract){
         return userList[_addr].auth;
     }
     
