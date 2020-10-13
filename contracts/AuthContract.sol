@@ -1,4 +1,4 @@
-pragma solidity >=0.6.4 <=7.3.0;
+pragma solidity >=0.6.4 <=0.7.3;
 
 import "./GeneralContract.sol";
 
@@ -12,10 +12,10 @@ contract AuthContract {
         bytes32 passHash;
         // Timestamp relative to today
         uint24 time; // seconds in a day: 2 ^ 16.39
-        bool isUsed;
+        bool valid;
         uint16 ttl;
         // The OTP can expire the next day it's issued (p.e. 00:01)
-        uint32 date; // 2^32 days is about 136 years
+        uint8 date; // 2^32 days is about 136 years
     }
 
     /* MODIFIERS */
@@ -26,8 +26,9 @@ contract AuthContract {
     }
 
     modifier validOTP{
-        require(eOTP.isUsed == false);
-        require( (eOTP.date * 1 days) + (eOTP.ttl * 1 seconds) == (getToday() * 1 days) + (secondOfDay() * 1 seconds));
+        require(eOTP.valid == true, "This OTP is not valid");
+        // (day since 1/1/2020 + ttl)
+        require((eOTP.date) * 1 days + secondOfDay() + (eOTP.ttl) > getToday() * 1 days + secondOfDay(), "timestamp expired");
         _;
     }
 
@@ -40,8 +41,8 @@ contract AuthContract {
         // Set status data
         gc = _genContract;
         employee = _employee;
-        // Generate an invalid token
-        eOTP = OTP(0,0,true,0,0);
+        // No need to generate an invalid token
+        // default values already provide it
     }
 
     /* FUNCTIONS */
@@ -65,7 +66,7 @@ contract AuthContract {
         // OTP day
         eOTP.date = getToday();
         // Used flag
-        eOTP.isUsed = false;
+        eOTP.valid = true;
         // Pass Hash
         eOTP.passHash = keccak256(abi.encode(p));
         
