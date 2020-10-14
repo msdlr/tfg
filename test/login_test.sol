@@ -43,4 +43,10 @@ contract login_test {
         testContract.tryLogout();
         Assert.isFalse(testContract.getUserLoggedIn(thisContract),"[test_trylogout] logout failed");
     }
+
+    //function test_tryInvalidlogin() public {
+    //    testContract.tryLogin(pass+1);
+    //    Assert.isTrue(testContract.getUserLoggedIn(thisContract),"[test_trylogin] user was not logged in");
+    //    Assert.isTrue(testContract.getUserAttempts(thisContract) == 0,"[test_trylogin] user was not logged in");
+    //}
 } 

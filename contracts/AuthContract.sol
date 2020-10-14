@@ -45,10 +45,11 @@ contract AuthContract {
     }
 
     /* FUNCTIONS */
-    function tryLogin(uint16 _pass) public view validOTP returns(bool success) {
+    function tryLogin(uint16 _pass) public validOTP returns(bool success) {
         // We just revert if the OTP is not valid
         success = false;
         require (keccak256(abi.encode(_pass)) == eOTP.passHash, "The password is not correct");
+        eOTP.valid = false;
         return true;
     }
 
