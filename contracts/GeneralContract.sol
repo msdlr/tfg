@@ -50,7 +50,7 @@ contract GeneralContract {
         userList[owner].adminStatus = true;
         userList[owner].id = id_;
         id2a[id_] = owner;
-        //userList[owner].auth = new AuthContract(this, owner);
+        userList[owner].auth = new AuthContract(this, owner);
         // Others fields are initialized as default values (0, false)
     }
 
