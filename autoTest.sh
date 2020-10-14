@@ -1,5 +1,8 @@
 #!/bin/sh
 
-command -v entr || (echo "install entr"; exit)
+command -v entr >/dev/null || (echo "install entr"; exit)
 
-ls contracts/*sol test/*sol | entr truffle test
+while true 
+do
+	ls contracts/*sol test/*sol | entr truffle test
+done
