@@ -1,4 +1,5 @@
-build/
-truffle-config.js
-node_modules/
-package-lock.json
+# Truffle
+src/solidity/build/
+src/solidity/truffle-config.js
+src/solidity/node_modules/
+src/solidity/package-lock.json
