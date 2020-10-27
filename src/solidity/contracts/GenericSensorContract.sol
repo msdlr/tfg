@@ -19,7 +19,7 @@ contract GenericSensorContract {
 
     /* State variables */
     // Value picked up by the sensor
-    uint8 valueRead;
+    uint8 lastValueRead;
     // Rate of reading the sensor (ms)
     uint32 rate;
     // Number of items in the whole History
@@ -31,9 +31,14 @@ contract GenericSensorContract {
     // Index of records, indexed per month (from 0 to current month)
     mapping(uint32 => uint) monthCount;
 
+    /* Modifiers */
+    modifier onlyContract{
+        require(msg.sender == address(gc),"can only be called from the company contract");
+        _;
+    }
 
     /* Setters / getters */
-    function getHistoryLength() public view returns (uint) {
+    function getHistoryLength(address) public view returns (uint) {
         return historyLength;
     }
 
@@ -41,7 +46,19 @@ contract GenericSensorContract {
         return rate;
     }
 
-    function setRate(uint32 newRate) public {
+    function setRate(uint32 newRate) public onlyContract {
+        // TODO: authentication in setters
         rate = newRate;
     }
+
+    /* Functionality */
+    // This function registers a abnormal value in the Record
+    // It's passed the month so that that computation is made on the client
+    //function registerValue(uint8 value, uint32 month) public onlyContract {
+        //Record r;
+        //
+        //// Increment index
+        //historyLength++;
+        //monthCount[month]++;
+    //} 
 }
