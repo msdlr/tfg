@@ -22,6 +22,12 @@ contract GenericSensorContract {
     uint8 valueRead;
     // Rate of reading the sensor (ms)
     uint32 rate;
+    // Number of items in the whole History
+    uint historyLength;
     // History of records for anormal values
-    mapping(uint32 => Record) History;
+    mapping(uint => Record) History;
+    // Number of record this month
+    uint32 month;
+    // Index of records, indexed per month (from 0 to current month)
+    mapping(uint32 => uint) monthCount;
 }
