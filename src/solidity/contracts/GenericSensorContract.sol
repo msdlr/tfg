@@ -30,4 +30,18 @@ contract GenericSensorContract {
     uint32 month;
     // Index of records, indexed per month (from 0 to current month)
     mapping(uint32 => uint) monthCount;
+
+
+    /* Setters / getters */
+    function getHistoryLength() public view returns (uint) {
+        return historyLength;
+    }
+
+    function getRate() public view returns (uint32) {
+        return rate;
+    }
+
+    function setRate(uint32 newRate) public {
+        rate = newRate;
+    }
 }
