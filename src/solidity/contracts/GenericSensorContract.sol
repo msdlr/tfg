@@ -27,9 +27,9 @@ contract GenericSensorContract {
     // History of records for anormal values
     mapping(uint => Record) History;
     // Number of record this month
-    uint32 month;
+    uint32 monthCount;
     // Index of records, indexed per month (from 0 to current month)
-    mapping(uint32 => uint) monthCount;
+    mapping(uint32 => uint) monthlyRecord;
 
     /* Modifiers */
     modifier onlyContract{
@@ -54,11 +54,27 @@ contract GenericSensorContract {
     /* Functionality */
     // This function registers a abnormal value in the Record
     // It's passed the month so that that computation is made on the client
-    //function registerValue(uint8 value, uint32 month) public onlyContract {
-        //Record r;
-        //
-        //// Increment index
-        //historyLength++;
-        //monthCount[month]++;
-    //} 
+    function registerValue(uint8 value) public onlyContract {
+        // Create entry in the sensor history
+        Record memory r;
+        // Append data
+        r.day = getToday();
+        r.second = secondOfDay();
+        r.valueStored = value;
+
+        // Increment index
+        historyLength++;
+        monthlyRecord[monthCount]++;
+    }
+
+
+    /* AUXILIARY FUNCTIONS */
+    //Day number since 1/1/2020 (UNIX time + 50 years)
+    function getToday() private view returns(uint16 today){
+        uint day = (block.timestamp / 1 days) - (50*365 days);
+        return uint16(day);
+    }
+    function secondOfDay() private view returns(uint24 sec){
+        sec = uint24(block.timestamp % getToday());
+    }
 }
