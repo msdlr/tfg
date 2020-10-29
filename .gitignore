@@ -3,3 +3,6 @@ src/solidity/build/
 src/solidity/truffle-config.js
 src/solidity/node_modules/
 src/solidity/package-lock.json
+
+# Node
+node_modules
