@@ -63,9 +63,9 @@ abstract contract GenericSensorContract {
         return defaultRate;
     }
 
-    function setRate(uint32 newRate) public onlyContract {
+    function setRate(uint32 _newRate) public onlyContract {
         // TODO: authentication in setters
-        rate = newRate;
+        rate = _newRate;
     }
     
     function getLastValueRead() public view returns (uint32) {
@@ -75,13 +75,13 @@ abstract contract GenericSensorContract {
     /* Functionality */
     // This function registers a abnormal value in the Record
     // It's passed the month so that that computation is made on the client
-    function registerValue(uint8 value) public onlyContract {
+    function registerValue(uint8 _value) public onlyContract {
         // Create entry in the sensor history
         Record memory r;
         // Append data
         r.day = getToday();
         r.second = secondOfDay();
-        r.valueStored = value;
+        r.valueStored = _value;
 
         // Increment index
         historyLength++;
@@ -90,13 +90,13 @@ abstract contract GenericSensorContract {
 
     // The client sends the value picked up by the sensor and this function
     // evaluates wether to store it and/or notify
-    function storeNotify(uint8 value) public view returns (bool mustStore, bool mustNotify) {
+    function storeNotify(uint8 _value) public view returns (bool mustStore, bool mustNotify) {
         // Evaluate if we need to notify
-        mustNotify = (value >= maxOk || value <= minOk);
+        mustNotify = (_value >= maxOk || _value <= minOk);
         // If we have to notify we also have to write the record
         if (mustNotify) return(true, true);
         // Check if only a write in the record is needed
-        else mustStore = (value >= warningMax || value <= warningMin);
+        else mustStore = (_value >= warningMax || _value <= warningMin);
     }
 
 
