@@ -12,6 +12,11 @@ abstract contract GenericSensorContract {
         uint8 valueStored;
     }
 
+    struct PermissionStruct {
+        bool canRead;
+        bool canWrite;
+    }
+
     /* Attributes of the contract in context of the organization */
 
     // General contract of the organization
@@ -31,6 +36,8 @@ abstract contract GenericSensorContract {
     uint32 private  monthCount;
     // Index of records, indexed per month (from 0 to current month)
     mapping(uint32 => uint) private monthlyRecord;
+    // General permissions
+    mapping(address => PermissionStruct) permissions;
 
     /* Business logic variables */
 
@@ -70,6 +77,25 @@ abstract contract GenericSensorContract {
     
     function getLastValueRead() public view returns (uint32) {
         return lastValueRead;
+    }
+
+    function setGeneralPermissions(address _caller, bool _r, bool _w) public onlyContract{
+        require (gc.getUserAdmin(_caller) || _caller == responsible,
+        "Caller does not have the right to set permissions for this contract");
+        permissions[address(0)].canRead = _r;
+        permissions[address(0)].canWrite = _w;
+    
+    }
+
+    function getGeneralPermissions() public returns(bool,bool){
+        return (permissions[address(0)].canRead, permissions[address(0)].canWrite);
+    }
+
+    function setUserPermissions(address _caller, address _who, bool _r, bool _w) public {
+        require (gc.getUserAdmin(_caller) || _caller == responsible,
+        "Caller does not have the right to set permissions for this contract");
+        permissions[_who].canRead = _r;
+        permissions[_who].canWrite = _w;
     }
 
     /* Functionality */
