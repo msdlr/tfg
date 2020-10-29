@@ -15,33 +15,34 @@ abstract contract GenericSensorContract {
     /* Attributes of the contract in context of the organization */
 
     // General contract of the organization
-    GeneralContract gc;
+    GeneralContract private gc;
     // Address of person responsible to this sensor
-    address responsible;
+    address private responsible;
 
     /* State variables */
 
     // Value picked up by the sensor
-    uint8 lastValueRead;
+    uint32 private lastValueRead;
     // Number of items in the whole History
-    uint historyLength;
+    uint32 private historyLength;
     // History of records for anormal values
-    mapping(uint => Record) History;
+    mapping(uint => Record) private History;
     // Number of record this month
-    uint32 monthCount;
+    uint32 private  monthCount;
     // Index of records, indexed per month (from 0 to current month)
-    mapping(uint32 => uint) monthlyRecord;
+    mapping(uint32 => uint) private monthlyRecord;
 
     /* Business logic variables */
 
     // Rate of reading the sensor (ms)
-    uint32 rate;
+    uint32 private defaultRate;
+    uint32 private rate;
     // Average values for the constant
-    uint32 constant avgValue=0;
-    uint32 constant maxOk=0; // If the value is above this, we have to register it and notify
-    uint32 constant minOk=0; // If the value is under this, we have to register it and notify
-    uint32 constant warningMin=0; // Under this value, we only register it
-    uint32 constant warningMax=0; // Above this value, we only register it
+    uint32 private avgValue;
+    uint32 private maxOk; // If the value is above this, we have to register it and notify
+    uint32 private minOk; // If the value is under this, we have to register it and notify
+    uint32 private warningMin; // Under this value, we only register it
+    uint32 private warningMax; // Above this value, we only register it
 
     /* Modifiers */
     modifier onlyContract{
@@ -50,7 +51,7 @@ abstract contract GenericSensorContract {
     }
 
     /* Setters / getters */
-    function getHistoryLength(address) public view returns (uint) {
+    function getHistoryLength() public view returns (uint32) {
         return historyLength;
     }
 
@@ -58,9 +59,17 @@ abstract contract GenericSensorContract {
         return rate;
     }
 
+    function getDefaultRate() public view returns (uint32) {
+        return defaultRate;
+    }
+
     function setRate(uint32 newRate) public onlyContract {
         // TODO: authentication in setters
         rate = newRate;
+    }
+    
+    function getLastValueRead() public view returns (uint32) {
+        return lastValueRead;
     }
 
     /* Functionality */
