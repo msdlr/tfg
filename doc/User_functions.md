@@ -1,6 +1,6 @@
 ### User functions.
 
-User functions are accessed from the appication's general contract, although being in other separate contects like AuthContract or such, through wrapper functions; allowing the access and keeping control of these contracts from the main one.
+User functions are accessed from the application's general contract, although being in other separate contacts like AuthContract or such, through wrapper functions; controlling the access and keeping control of these contracts from the main one.
 
 #### Login and authentication.
 Users are added by their Ethereum address to the system by administrators, making the management of users and contract centralised within the General Contract, but still retaining distributed access to that contract. 
