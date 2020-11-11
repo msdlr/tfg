@@ -130,7 +130,7 @@ contract GeneralContract {
     }
 
     function amILocked() public view onlyRegistered returns (bool locked){
-        locked = (userList[msg.sender].attempts > 3);
+        locked = (userList[msg.sender].attempts >= 3);
     }
 
     function tryLogout() public onlyRegistered {
