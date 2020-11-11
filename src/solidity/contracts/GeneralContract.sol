@@ -38,11 +38,18 @@ contract GeneralContract {
     /* Contract data */
     mapping ( address => User)  private userList ;
     mapping ( string => address) private id2a; // Index by id
-    address private owner;
+    address private owner = address(0);
 
     /* CONSTRUCTOR */
 
-    constructor(address owner_, string memory id_) public payable{
+    constructor() public payable{
+        // Instantiate the contract
+    }
+
+    function initialize(address owner_, string memory id_) public payable{
+        // Require that the is no owner
+        require(owner == address(0),"");
+
         // Set the owner of the company
         owner = owner_;
 
