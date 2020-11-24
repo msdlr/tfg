@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -13,7 +12,16 @@ import (
 /*
 	Global vars and functions
 */
+/* ENVVARS */
+// $HOME
 var envHOME = os.Getenv("HOME")
+// New envvar: ETHKS, where keystores are saved
+var _ = os.Setenv("ETHKS", envHOME+"/eth/")
+var envETHKS string = os.Getenv("ETHKS")
+
+/* GLOBAL VARS */
+// keystore to search for ethereum keys
+var ks = keystore.NewKeyStore(envETHKS, keystore.StandardScryptN, keystore.StandardScryptP)
 
 func dial(url string) {
 	// Dial address: ganache in localhost
@@ -27,37 +35,39 @@ func dial(url string) {
 	}
 }
 
-// Load an eth keypair
-func readKeystore(_pathToKeypair string, _password string) {
+// Load an eth keypair with a password, from the keystore path
+func useAccount(_pubKey string, _password string) {
 	// Encrypted keypair
-	file := _pathToKeypair
+	//file := _pubKey
 	// Create a new keypair
-	ks := keystore.NewKeyStore(envHOME+"/eth/", keystore.StandardScryptN, keystore.StandardScryptP)
-	jsonBytes, err := ioutil.ReadFile(file)
-	if err != nil {
-		log.Fatal(err)
+
+	// This returns an array with the keys stored in the keystore path
+	var ethAccArray = ks.Accounts()
+	var success bool = false
+	
+	// Iterate through every account to find which pub key coincides
+	for i:= 0; i< len(ethAccArray); i++ {
+		err := ks.Unlock(ethAccArray[i], _password)
+		if err == nil {
+			success = true
+			// Account is unlocked, we can get out of the iterating loop
+			fmt.Println("Account " + _pubKey + " unlocked!")
+			break
+		} else {
+			// This block is needed so that golang compiles, but not for the program logic
+			success = false
+		}
 	}
-
-	password := _password
-	account, err := ks.Import(jsonBytes, password, password)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(account.Address.Hex()) // 0x20F8D42FB0F667F2E53930fed426f225752453b3
-
-	if err := os.Remove(file); err != nil {
-		log.Fatal(err)
+	// If no account was unlocked
+	if !success {
+		fmt.Println("Account was not found")
 	}
 }
 
 // New keypair
 func newKeystore(_path string, _pass string) {
-	// Create the new kp file
-	ks := keystore.NewKeyStore(_path, keystore.StandardScryptN, keystore.StandardScryptP)
-	password := _pass
 	// Encrypt private key
-	account, err := ks.NewAccount(password)
+	account, err := ks.NewAccount(_pass)
 
 	// Error checking
 	if err != nil {
@@ -65,11 +75,6 @@ func newKeystore(_path string, _pass string) {
 	}
 	// fmt.Println(account.Address.Hex())
 	fmt.Printf("Created keypair w/ pub address " + account.Address.Hex() + "\n")
-}
-
-// When a keypair is generated we don't know the exact filename for it
-func locateGeneratedKeypair() {
-
 }
 
 func main() {
@@ -92,5 +97,5 @@ func main() {
 
 	// Create and setup the new address
 	//newKeystore(envHOME+"eth", "hola")
-	readKeystore(envHOME+"/eth/"+"UTC--2020-11-17T09-23-16.999473109Z--268c013964b50841fc534daa92954c2b049cb007", "hola")
+	useAccount("0x268c013964b50841fc534daa92954c2b049cb007", "hola")
 }
