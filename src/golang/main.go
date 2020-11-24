@@ -19,11 +19,15 @@ var envHOME = os.Getenv("HOME")
 var _ = os.Setenv("ETHKS", envHOME+"/eth/")
 var envETHKS string = os.Getenv("ETHKS")
 
+// Pub key of the unlocked string if needed
+// env: ETHACC
+var envUnlockedAccount string
+
 /* GLOBAL VARS */
 // keystore to search for ethereum keys
 var ks = keystore.NewKeyStore(envETHKS, keystore.StandardScryptN, keystore.StandardScryptP)
 
-func dial(url string) {
+func contactBlockchain(url string) error {
 	// Dial address: ganache in localhost
 	conn, err := ethclient.Dial(url)
 	if err != nil {
@@ -33,6 +37,7 @@ func dial(url string) {
 		fmt.Println("Connection to " + url + " successful!")
 		_ = conn
 	}
+	return err
 }
 
 // Load an eth keypair with a password, from the keystore path
@@ -52,6 +57,7 @@ func useAccount(_pubKey string, _password string) {
 			err := ks.Unlock(ethAccArray[i], _password)
 			if err == nil {
 				success = true
+				os.Setenv("ETHACC",ethAccArray[i].Address.Hex())
 				// Account is unlocked, we can get out of the iterating loop
 				fmt.Println("Account " + _pubKey + " unlocked!")
 				break
@@ -98,7 +104,11 @@ func main() {
 	}
 
 	// Stablish connection to the blockchain
-	dial(url)
+	// contactBlockchain returns an error, nil if none
+	if contactBlockchain(url) != nil {
+		fmt.Println("Error connecting to the blockchain")
+		os.Exit(1)
+	}
 
 	// Create and setup the new address
 	//newAccount(envHOME+"eth", "prueba")
