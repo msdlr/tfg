@@ -69,7 +69,7 @@ func useAccount(_pubKey string, _password string) {
 }
 
 // New keypair
-func newKeystore(_path string, _pass string) {
+func newAccount(_pass string) string {
 	// Encrypt private key
 	account, err := ks.NewAccount(_pass)
 
@@ -79,6 +79,7 @@ func newKeystore(_path string, _pass string) {
 	}
 	// fmt.Println(account.Address.Hex())
 	fmt.Printf("Created keypair w/ pub address " + account.Address.Hex() + "\n")
+	return account.Address.Hex()
 }
 
 func main() {
@@ -100,6 +101,6 @@ func main() {
 	dial(url)
 
 	// Create and setup the new address
-	//newKeystore(envHOME+"eth", "prueba")
+	//newAccount(envHOME+"eth", "prueba")
 	useAccount("0x0DDB3d979973A0288F4832676d2e6Aa29bC1d42d", "prueba")
 }
