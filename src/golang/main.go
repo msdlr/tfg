@@ -44,18 +44,22 @@ func useAccount(_pubKey string, _password string) {
 	// This returns an array with the keys stored in the keystore path
 	var ethAccArray = ks.Accounts()
 	var success bool = false
-	
+
 	// Iterate through every account to find which pub key coincides
 	for i:= 0; i< len(ethAccArray); i++ {
-		err := ks.Unlock(ethAccArray[i], _password)
-		if err == nil {
-			success = true
-			// Account is unlocked, we can get out of the iterating loop
-			fmt.Println("Account " + _pubKey + " unlocked!")
-			break
-		} else {
-			// This block is needed so that golang compiles, but not for the program logic
-			success = false
+		// Check if the pub key is the same as the one provided
+		if _pubKey == ethAccArray[i].Address.Hex()  {
+			err := ks.Unlock(ethAccArray[i], _password)
+			if err == nil {
+				success = true
+				// Account is unlocked, we can get out of the iterating loop
+				fmt.Println("Account " + _pubKey + " unlocked!")
+				break
+			} else {
+				// There has been an error unlocking the account
+				success = false
+				fmt.Println("Account was found but not unlocked")
+			}
 		}
 	}
 	// If no account was unlocked
@@ -87,7 +91,7 @@ func main() {
 	// No parameters provided
 	var url string
 	if len(os.Args) == 1 {
-		url = "http://localhost:8545"
+		url = "http://localhost:7545"
 	} else {
 		url = os.Args[1]
 	}
@@ -96,6 +100,6 @@ func main() {
 	dial(url)
 
 	// Create and setup the new address
-	//newKeystore(envHOME+"eth", "hola")
-	useAccount("0x268c013964b50841fc534daa92954c2b049cb007", "hola")
+	//newKeystore(envHOME+"eth", "prueba")
+	useAccount("0x0DDB3d979973A0288F4832676d2e6Aa29bC1d42d", "prueba")
 }
