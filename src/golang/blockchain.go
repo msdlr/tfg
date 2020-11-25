@@ -21,10 +21,7 @@ func contactBlockchain(url string) error {
 }
 
 // Load an eth keypair with a password, from the keystore path
-func useAccount(_pubKey string, _password string) {
-	// Encrypted keypair
-	//file := _pubKey
-	// Create a new keypair
+func openAccount(_pubKey string, _password string) {
 
 	// This returns an array with the keys stored in the keystore path
 	var ethAccArray = ks.Accounts()
@@ -66,4 +63,28 @@ func newAccount(_pass string) string {
 	// fmt.Println(account.Address.Hex())
 	fmt.Printf("Created keypair w/ pub address " + account.Address.Hex() + "\n")
 	return account.Address.Hex()
+}
+
+// Close the ethereum wallet when we are finished
+func closeAccount(){
+	// This returns an array with the keys stored in the keystore path
+	var ethAccArray = ks.Accounts()
+	var acc string = os.Getenv("ETHACC")
+
+	// Iterate through every account to find which pub key coincides
+	for i:= 0; i< len(ethAccArray); i++ {
+		// Search for the public key to lock
+		if acc == ethAccArray[i].Address.Hex() {
+			// If found, it is locked so that noone can access it.
+			err := ks.Lock(ks.Accounts()[i].Address)
+			if err == nil {
+				os.Setenv("ETHACC", ethAccArray[i].Address.Hex())
+				// Account is unlocked, we can get out of the iterating loop
+				fmt.Println("Account " + acc + " locked")
+				break
+			} else {
+				fmt.Println("Account was found but not locked")
+			}
+		}
+	}
 }

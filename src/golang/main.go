@@ -50,5 +50,6 @@ func main() {
 
 	// Create and setup the new address
 	//newAccount(envHOME+"eth", "prueba")
-	useAccount("0x0DDB3d979973A0288F4832676d2e6Aa29bC1d42d", "prueba")
+	openAccount("0x0DDB3d979973A0288F4832676d2e6Aa29bC1d42d", "prueba")
+	closeAccount()
 }
