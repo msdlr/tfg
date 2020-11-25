@@ -18,9 +18,10 @@ var envHOME = os.Getenv("HOME")
 // New envvar: ETHKS, where keystores are saved
 var _ = os.Setenv("ETHKS", envHOME+"/eth/")
 var envETHKS string = os.Getenv("ETHKS")
+var _ = os.Setenv("RPCENDPOINTG","http://localhost:7545")
+var envRPCENDPOINT = "http://localhost:7545"
 
-// Pub key of the unlocked string if needed
-// env: ETHACC
+// Pub key of the unlocked string if needed. env: ETHACC
 var envUnlockedAccount string
 
 /* GLOBAL VARS */
@@ -92,13 +93,13 @@ func main() {
 	/*
 		Param checking:
 		If none: default (localhost)
-		1: url of node to stablich connection to.
+		1: url of node to stablish connection to.
 	*/
 
 	// No parameters provided
 	var url string
 	if len(os.Args) == 1 {
-		url = "http://localhost:7545"
+		url = envRPCENDPOINT
 	} else {
 		url = os.Args[1]
 	}
