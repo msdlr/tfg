@@ -33,4 +33,4 @@ done
 
 # Post: remove build/ directory and move .go files to src/go
 rm -rv build/ 2>/dev/null
-mv -r *go ../golang
+mv -v *go ../golang
