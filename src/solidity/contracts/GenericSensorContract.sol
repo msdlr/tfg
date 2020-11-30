@@ -1,4 +1,4 @@
-pragma solidity >=0.6.4 <=0.7.3;
+pragma solidity >=0.6.4;
 
 import "./GeneralContract.sol";
 
