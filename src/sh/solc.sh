@@ -20,17 +20,17 @@ c_bin=$(echo $c | sed -e 's/\.sol/\.bin/ ' -e 's|../solidity/contracts/||g')
 
 # Convert .abi file to .go
 #echo "abigen --abi=./build/$c_abi --pkg=main --out=$c_go"
-abigen --abi=./build/$c_abi --pkg=main --out=$c_go
+abigen --abi=./build/$c_abi --pkg=main --out=_$c_go
 
 #echo "solc --bin $c --overwrite -o build"
 solc --bin $c --overwrite -o build
 
 # Compile go contract with included deploy methods
 #echo "abigen --bin=./build/$c_abi --abi=./build/$c_abi --pkg=main --out=$c_go"
-abigen --bin=./build/$c_bin --abi=./build/$c_abi --pkg=main --out=$c_go  
+abigen --bin=./build/$c_bin --abi=./build/$c_abi --pkg=main --out=_$c_go  
 
 done
 
 # Post: remove build/ directory and move .go files to src/go
-rm -rv build/ 2>/dev/null
+rm -r build/ 2>/dev/null
 mv -v *go ../golang
