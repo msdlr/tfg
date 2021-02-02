@@ -76,7 +76,7 @@ contract AuthContract {
 
     function terminate() external onlyContract{
         // We already require that msg.sender is the general contract
-        selfdestruct(msg.sender);
+        selfdestruct(payable(msg.sender));
     }
 
     //Day number since 1/1/2020 (UNIX time + 50 years)
