@@ -6,3 +6,4 @@ src/solidity/package-lock.json
 .secret
 # Node
 node_modules
+src/golang/solc_*.go
