@@ -8,3 +8,6 @@ sudo apt install golang-go -y # The one in ubuntu/debian? repos
 go get github.com/ethereum/go-ethereum # Ethereum
 go get github.com/gorilla/websocket
 go get github.com/shirou/gopsutil/cpu
+
+sudo apt install npm -y
+sudo npm install -g truffle
