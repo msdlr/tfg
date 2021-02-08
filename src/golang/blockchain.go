@@ -56,7 +56,7 @@ func CreateNewAccount(ks *keystore.KeyStore, _pass string) string {
 
 	// Error checking
 	if err != nil {
-		log.Fatal(err)
+		//log.Fatal(err)
 		return ""
 	}
 	// fmt.Println(account.Address.Hex())

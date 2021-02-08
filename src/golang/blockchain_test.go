@@ -10,14 +10,26 @@ import (
 var testKs keystore.KeyStore
 var ksDir = "/tmp/aaaa"
 
-func TestNewAccount(t *testing.T) {
+func TestNewAccountOK(t *testing.T) {
 	testKs := keystore.NewKeyStore(ksDir, keystore.StandardScryptN, keystore.StandardScryptP)
 
 	newPubkey := CreateNewAccount(testKs, "passw0rd")
 	if newPubkey == "" {
-		t.Errorf("[Error] TestNewAccount:\tAccount not created")
+		t.Errorf("[Error] TestNewAccountOK:\tAccount not created")
 	}
 }
+
+func TestNewAccountNilKS(t *testing.T) {
+	// Give a location for the KS where user has no permission
+	testKs := keystore.NewKeyStore("/", keystore.StandardScryptN, keystore.StandardScryptP)
+	var newPubkey string = ""
+
+	newPubkey = CreateNewAccount(testKs, "passw0rd")
+	if newPubkey != "" {
+		t.Errorf("[Error] TestNewAccountNilKS:\tAccount was created somehow (?)")
+	}
+}
+
 func TestOpenAccount(t *testing.T) {
 	testKs := keystore.NewKeyStore(ksDir, keystore.StandardScryptN, keystore.StandardScryptP)
 	// We need to create new wallets to have public keys to unlock
@@ -38,7 +50,7 @@ func TestOpenAccount(t *testing.T) {
 	}
 }
 
-func TestCloseAccount(t *testing.T) {
+func TestCloseAccountOK(t *testing.T) {
 	testKs := keystore.NewKeyStore(ksDir, keystore.StandardScryptN, keystore.StandardScryptP)
 	// We need to create new wallets to have public keys to unlock
 	pub := CreateNewAccount(testKs, "passw0rd")
@@ -46,6 +58,6 @@ func TestCloseAccount(t *testing.T) {
 	//OpenAccount(testKs, pub, "passw0rd")
 
 	if !CloseAccount(testKs, pub) {
-		t.Error("[Error] TestCloseAccount:\tAccount not unlocked")
+		t.Error("[Error] TestCloseAccountOK:\tAccount not unlocked")
 	}
 }
