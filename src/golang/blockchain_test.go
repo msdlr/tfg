@@ -13,7 +13,7 @@ var ksDir = "/tmp/aaaa"
 func TestNewAccount(t *testing.T) {
 	testKs := keystore.NewKeyStore(ksDir, keystore.StandardScryptN, keystore.StandardScryptP)
 
-	newPubkey := CreatenewAccount(testKs, "passw0rd")
+	newPubkey := CreateNewAccount(testKs, "passw0rd")
 	if newPubkey == "" {
 		t.Errorf("[Error] TestNewAccount:\tAccount not created")
 	}
@@ -21,8 +21,8 @@ func TestNewAccount(t *testing.T) {
 func TestOpenAccount(t *testing.T) {
 	testKs := keystore.NewKeyStore(ksDir, keystore.StandardScryptN, keystore.StandardScryptP)
 	// We need to create new wallets to have public keys to unlock
-	successfulPub := CreatenewAccount(testKs, "passw0rd")
-	failPub := CreatenewAccount(testKs, "passw0rd")
+	successfulPub := CreateNewAccount(testKs, "passw0rd")
+	failPub := CreateNewAccount(testKs, "passw0rd")
 
 	// Close them
 	CloseAccount(testKs, successfulPub)
@@ -41,7 +41,7 @@ func TestOpenAccount(t *testing.T) {
 func TestCloseAccount(t *testing.T) {
 	testKs := keystore.NewKeyStore(ksDir, keystore.StandardScryptN, keystore.StandardScryptP)
 	// We need to create new wallets to have public keys to unlock
-	pub := CreatenewAccount(testKs, "passw0rd")
+	pub := CreateNewAccount(testKs, "passw0rd")
 	// Accounts unlocked by default
 	//OpenAccount(testKs, pub, "passw0rd")
 
