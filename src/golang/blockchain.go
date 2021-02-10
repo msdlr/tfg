@@ -1,7 +1,9 @@
 package main
 
 import (
+	"crypto/ecdsa"
 	"fmt"
+	"github.com/ethereum/go-ethereum/crypto"
 	"log"
 	"os"
 
@@ -124,4 +126,28 @@ func TuiListAndSelectAccounts(ks *keystore.KeyStore) {
 	fmt.Scanf("%d", &password)
 
 	OpenAccount(ks,ks.Accounts()[num].Address.Hex(),"1")
+}
+/*
+	Load ganache test account
+ */
+func loadTestAccount(){
+
+	// Truffle mnemonic:
+	// nominee degree coconut clock narrow prize sustain box galaxy this obscure win
+	var privKeyStr string = "ad92041b60126af952f8320b473ccb555d7274a53f1c27e12d2f1ea8aaecda7b"
+	privateKey, err := crypto.HexToECDSA(privKeyStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	publicKeyDerived := privateKey.Public()
+	publicKeyECDSA, ok := publicKeyDerived.(*ecdsa.PublicKey)
+	if !ok {
+		log.Fatal("error casting public key to ECDSA")
+	}
+
+	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
+
+	fmt.Printf("%x\n",fromAddress)
+	fmt.Printf("%x\n",*(&privateKey.D))
 }
