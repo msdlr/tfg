@@ -3,8 +3,10 @@ package main
 import (
 	"crypto/ecdsa"
 	"fmt"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/crypto"
 	"log"
+	"math/big"
 	"os"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
@@ -127,9 +129,10 @@ func TuiListAndSelectAccounts(ks *keystore.KeyStore) {
 
 	OpenAccount(ks,ks.Accounts()[num].Address.Hex(),"1")
 }
+
 /*
 	Load ganache test account
- */
+*/
 func loadTestAccount(){
 
 	// Truffle mnemonic:
@@ -150,4 +153,37 @@ func loadTestAccount(){
 
 	fmt.Printf("%x\n",fromAddress)
 	fmt.Printf("%x\n",*(&privateKey.D))
+
+	// Dial the ganache instance
+	client, err := ethclient.Dial("http://localhost:9545")
+
+	if err != nil {
+		fmt.Println("Error dialing the blockchain")
+	}
+
+	// Get the nonce
+	nonce, err := client.PendingBalanceAt(context.Background(), fromAddress)
+
+	if err != nil {
+		fmt.Println("Error getting nonce (",nonce,")")
+	}
+
+	gasPrice,err := client.SuggestGasPrice(context.Background())
+	if err != nil {
+		fmt.Println("Error getting gas price (",gasPrice,")")
+	}
+
+	// Set-up transaction ops with data retrieved
+	tops := bind.NewKeyedTransactor(privateKey)
+	tops.Nonce = nonce
+	tops.Value = big.NewInt(0)
+	tops.GasLimit = uint64(3E5)
+	tops.GasPrice = big.NewInt(0)
+
+	address, tx, instance, err := DeployMain(tops,client)
+	// Client.Close needed for ending the communication
+
+	fmt.Println(address,tx,instance)
+	fmt.Println(tx)
+	fmt.Println(instance)
 }
