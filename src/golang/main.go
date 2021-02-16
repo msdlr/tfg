@@ -2,54 +2,69 @@ package main
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/ethereum/go-ethereum/accounts/keystore"
+	"os"
+	"strconv"
+	"time"
 )
 
 /*
 	Global vars and functions
 */
-/* ENVVARS */
-// $HOME
-var envHOME = os.Getenv("HOME")
-// New envvar: ETHKS, where keystores are saved
-var _ = os.Setenv("ETHKS", envHOME+"/eth/")
-var envETHKS string = os.Getenv("ETHKS")
-var _ = os.Setenv("RPCENDPOINTG","http://localhost:7545")
-var envRPCENDPOINT = "http://localhost:7545"
-
-// Pub key of the unlocked string if needed. env: ETHACC
-var envUnlockedAccount string
 
 /* GLOBAL VARS */
 // keystore to use ethereum keys
-var ks = keystore.NewKeyStore(envETHKS, keystore.StandardScryptN, keystore.StandardScryptP)
+var ks *keystore.KeyStore
 
 func main() {
 	/*
-		Param checking:
-		If none: default (localhost)
-		1: url of node to stablish connection to.
+		Check&set envvars
 	*/
 
-	// No parameters provided
-	var url string
-	if len(os.Args) == 1 {
-		url = envRPCENDPOINT
-	} else {
-		url = os.Args[1]
+	var envHOME = os.Getenv("HOME") // This is not to be modified
+	envHOME=envHOME
+	// ETHereum KeyStore path
+	if os.Getenv("ETHKS") == "" {
+		os.Setenv("ETHKS", os.Getenv("HOME")+"/eth/node1/keystore")
 	}
 
-	// Stablish connection to the blockchain
-	// contactBlockchain returns an error, nil if none
-	if contactBlockchain(url) != nil {
-		fmt.Println("Error connecting to the blockchain")
-		os.Exit(1)
+	// Peer for connecting to the blockchain
+	if os.Getenv("RPCENDPOINT") == "" {
+		os.Setenv("RPCENDPOINT","http://localhost:7545")
 	}
 
-	// Create and setup the new address
-	//newAccount(envHOME+"eth", "prueba")
-	openAccount("0x0DDB3d979973A0288F4832676d2e6Aa29bC1d42d", "prueba")
-	closeAccount()
+	// Interval for checking blobkchain events
+	if os.Getenv("EVNTITV") == "" {
+		os.Setenv("EVNTITV","5")
+	}
+
+
+	// Set up keystore with the correct path
+	ks = keystore.NewKeyStore(os.Getenv("ETHKS"), keystore.StandardScryptN, keystore.StandardScryptP)
+
+
+	// Launch events checking
+	go checkEvents()
+
+	for true {
+		//fmt.Println("s")
+	}
+
+}
+
+// Start a goroutine to check for events in the Blockchain
+func checkEvents() {
+	secs, _ := strconv.Atoi(os.Getenv("EVNTITV")) // Get seconds as number
+
+	interval := time.Duration(secs) * time.Second
+	interval=interval
+	fmt.Println("Checking events...")
+
+	ticker := time.NewTicker(interval)
+
+	for range ticker.C {
+		// Code here is executed every second
+		fmt.Println(time.Now())
+	}
+
 }
