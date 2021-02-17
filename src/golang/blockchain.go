@@ -9,6 +9,7 @@ import (
 	"log"
 	"math/big"
 	"os"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -132,13 +133,13 @@ func TuiListAndSelectAccounts(ks *keystore.KeyStore) {
 }
 
 /*
-	Load ganache test account
+	Load ganache test account, does not require keystore
 */
-func loadTestAccount(){
+func loadTestAccount(pubKeyStr string, privKeyStr string){
 
 	// Truffle mnemonic:
 	// nominee degree coconut clock narrow prize sustain box galaxy this obscure win
-	var privKeyStr string = "ad92041b60126af952f8320b473ccb555d7274a53f1c27e12d2f1ea8aaecda7b"
+
 	privateKey, err := crypto.HexToECDSA(privKeyStr)
 	if err != nil {
 		log.Fatal(err)
@@ -150,9 +151,13 @@ func loadTestAccount(){
 		log.Fatal("error casting public key to ECDSA")
 	}
 
-	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
+	pubAddrStr := crypto.PubkeyToAddress(*publicKeyECDSA)
 
-	fmt.Printf("%x\n",fromAddress)
+	if strings.Compare(pubKeyStr,pubAddrStr.Hex()) != 0 {
+		fmt.Println("Keys do not match")
+	}
+
+	fmt.Printf("%x\n", pubAddrStr)
 	fmt.Printf("%x\n",*(&privateKey.D))
 
 	// Dial the ganache instance
@@ -163,7 +168,7 @@ func loadTestAccount(){
 	}
 
 	// Get the nonce
-	nonce, err := client.PendingBalanceAt(context.Background(), fromAddress)
+	nonce, err := client.PendingBalanceAt(context.Background(), pubAddrStr)
 
 	if err != nil {
 		fmt.Println("Error getting nonce (",nonce,")")
@@ -178,8 +183,8 @@ func loadTestAccount(){
 	tops := bind.NewKeyedTransactor(privateKey)
 	tops.Nonce = nonce
 	tops.Value = big.NewInt(0)
-	tops.GasLimit = uint64(3E5)
-	tops.GasPrice = big.NewInt(0)
+	tops.GasLimit = uint64(6721975)
+	tops.GasPrice = big.NewInt(3000)
 
 	address, tx, instance, err := DeployMain(tops,client)
 	// Client.Close needed for ending the communication

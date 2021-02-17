@@ -46,6 +46,8 @@ func main() {
 	// Launch events checking
 	go checkEvents()
 
+	loadTestAccount("0xFDb59BC058eFde421AdF049F27d3A03a4cedea2f", "ad92041b60126af952f8320b473ccb555d7274a53f1c27e12d2f1ea8aaecda7b")
+	// Main routine stuck in inf loop
 	for true {
 		//fmt.Println("s")
 	}
@@ -64,7 +66,7 @@ func checkEvents() {
 
 	for range ticker.C {
 		// Code here is executed every second
-		fmt.Println(time.Now())
+		fmt.Println("Checking events...", time.Now().UTC())
 	}
 
 }
