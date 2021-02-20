@@ -2,7 +2,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethclient"
+	"log"
+	"math/big"
 	"os"
 	"strconv"
 	"time"
@@ -21,8 +26,6 @@ func main() {
 		Check&set envvars
 	*/
 
-	var envHOME = os.Getenv("HOME") // This is not to be modified
-	envHOME=envHOME
 	// ETHereum KeyStore path
 	if os.Getenv("ETHKS") == "" {
 		os.Setenv("ETHKS", os.Getenv("HOME")+"/eth/node1/keystore")
@@ -40,31 +43,48 @@ func main() {
 
 	// Chain ID
 	if os.Getenv("CHAINID") == "" {
-		os.Setenv("CHAINID","5777")
+		os.Setenv("CHAINID","1337")
 	}
 
+	// Ethereum private key
 	if os.Getenv("PRIVKEY") == "" {
 		os.Setenv("PRIVKEY","ad92041b60126af952f8320b473ccb555d7274a53f1c27e12d2f1ea8aaecda7b")
 	}
 
-
 	// Set up keystore with the correct path
 	ks = keystore.NewKeyStore(os.Getenv("ETHKS"), keystore.StandardScryptN, keystore.StandardScryptP)
 
+	privateKey, _ := crypto.HexToECDSA( os.Getenv("PRIVKEY") )
+	chainId,_ :=strconv.Atoi(os.Getenv("CHAINID"))
+
+	transactOps, err := bind.NewKeyedTransactorWithChainID(privateKey,big.NewInt(int64(chainId)))
+	if err != nil {
+		log.Fatalf("Error getting TransactionOps: %v", err)
+	}
+
+	client, err := ethclient.Dial("/home/ms/eth/node1/geth.ipc")
+	if err != nil {
+		log.Fatalf("Failed to connect to the Ethereum client: %v", err)
+	}
+	client = client
+
+	// DeployMain(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *Main, error)
+	addr, trans,main,err :=DeployMain(transactOps,client)
+
+	fmt.Println(addr,trans,main)
+
+
+	/*
 
 	// Launch events checking
 	go checkEvents()
-
-	// Man routine
-	//loadTestAccount("0xFDb59BC058eFde421AdF049F27d3A03a4cedea2f", "ad92041b60126af952f8320b473ccb555d7274a53f1c27e12d2f1ea8aaecda7b")
-	getTransactOps()
-
 
 	// Main routine stuck in inf loop
 	for true {
 		//fmt.Println("s")
 	}
 
+	*/
 }
 
 // Start a goroutine to check for events in the Blockchain
@@ -72,7 +92,6 @@ func checkEvents() {
 	secs, _ := strconv.Atoi(os.Getenv("EVNTITV")) // Get seconds as number
 
 	interval := time.Duration(secs) * time.Second
-	interval=interval
 	fmt.Println("Checking events...")
 
 	ticker := time.NewTicker(interval)
