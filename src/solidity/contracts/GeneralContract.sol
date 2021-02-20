@@ -1,6 +1,7 @@
-pragma solidity >=0.6.4 <=7.3.0;
+pragma solidity >=0.6.4;
 
 import "./AuthContract.sol";
+import "./GenericSensorContract.sol";
 
 contract GeneralContract {
 
@@ -37,11 +38,18 @@ contract GeneralContract {
     /* Contract data */
     mapping ( address => User)  private userList ;
     mapping ( string => address) private id2a; // Index by id
-    address private owner;
+    address private owner = address(0);
 
     /* CONSTRUCTOR */
 
-    constructor(address owner_, string memory id_) public payable{
+    constructor() public payable{
+        // Instantiate the contract
+    }
+
+    function initialize(address owner_, string memory id_) public payable{
+        // Require that the is no owner
+        require(owner == address(0),"");
+
         // Set the owner of the company
         owner = owner_;
 
@@ -91,7 +99,7 @@ contract GeneralContract {
     }
 
     function demoteAdmin(address _addr) public onlyAdmin {
-                // Check that the user is added
+        // Check that the user is added
         require(userList[_addr].isRegistered == true,"User does not exist.");
         // We update the user's profile with admin status
         userList[_addr].adminStatus = false;
@@ -109,7 +117,6 @@ contract GeneralContract {
     function tryLogin(uint16 _pass) public onlyRegistered userNotLocked {
         // We call that specific contract function
         require(userList[msg.sender].isLoggedIn == false, "You are already logged in");
-        
         // Every time an attempt is made, the count is increased
         if(userList[msg.sender].auth.tryLogin(_pass) == true){
             // Successful login
@@ -121,7 +128,7 @@ contract GeneralContract {
             userList[msg.sender].attempts++;
         }
     }
-    
+
     function amILocked() public view onlyRegistered returns (bool locked){
         locked = (userList[msg.sender].attempts >= 3);
     }
@@ -131,19 +138,18 @@ contract GeneralContract {
         require(userList[msg.sender].isLoggedIn == true, "You are not logged in");
         userList[msg.sender].isLoggedIn = false;
     }
-    
+
     /* SETTERS / GETTERS */
     function getOwner() public view returns(address owner_){
         return owner;
     }
-    
+
     function setOwner(address _newOwner) public{
         require(msg.sender == owner,"Only the owner can do this");
         owner = _newOwner;
     }
-    
+
     //Functions for retrieving the user struct fields
-    
     function getContractAddress() public view returns (address){
         return address(this);
     }
@@ -151,7 +157,7 @@ contract GeneralContract {
     function getUserId(address _addr) public view returns (string memory){
         return userList[_addr].id;
     }
-    
+
     function getUserAddress(string memory _id) public view returns (address){
         return id2a[_id];
     }
@@ -159,21 +165,20 @@ contract GeneralContract {
     function getUserRegistered(address _addr) public view returns (bool){
         return userList[_addr].isRegistered;
     }
-    
+
     function getUserLoggedIn(address _addr) public view returns (bool){
         return userList[_addr].isLoggedIn;
     }
-    
+
     function getUserAdmin(address _addr) public view returns (bool){
         return userList[_addr].adminStatus;
     }
-    
+
     function getUserAuthContract(address _addr) public view returns (AuthContract){
         return userList[_addr].auth;
     }
-    
+
     function getUserAttempts(address _addr) public view returns (uint8){
         return userList[_addr].attempts;
     }
-    
 }

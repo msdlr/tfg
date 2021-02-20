@@ -24,7 +24,8 @@ contract adminFunctions_test {
     // msg.sender in GeneralContract -> address (this) in this contract
     function test_createContract() public {
         // Instantiate the contract to test
-        testContract = new GeneralContract(thisContract, "M4573R");
+        testContract = new GeneralContract();
+        testContract.initialize(thisContract, "M4573R");
         // Check that the constructor executed correctly
         //Assert.equal(thisContract, testContract.getOwner(), "owner address should be this caller");
         
