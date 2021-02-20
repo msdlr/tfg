@@ -62,7 +62,7 @@ func main() {
 		log.Fatalf("Error getting TransactionOps: %v", err)
 	}
 
-	client, err := ethclient.Dial("/home/ms/eth/node1/geth.ipc")
+	client, err := ethclient.Dial("HTTP://127.0.0.1:7545")
 	if err != nil {
 		log.Fatalf("Failed to connect to the Ethereum client: %v", err)
 	}
@@ -71,7 +71,7 @@ func main() {
 	// DeployMain(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *Main, error)
 	addr, trans,main,err :=DeployMain(transactOps,client)
 
-	fmt.Println(addr,trans,main)
+	fmt.Println(addr.Hex(),trans,main)
 
 
 	/*
