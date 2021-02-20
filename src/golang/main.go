@@ -33,9 +33,18 @@ func main() {
 		os.Setenv("RPCENDPOINT","http://localhost:7545")
 	}
 
-	// Interval for checking blobkchain events
+	// Interval for checking blockchain events
 	if os.Getenv("EVNTITV") == "" {
 		os.Setenv("EVNTITV","5")
+	}
+
+	// Chain ID
+	if os.Getenv("CHAINID") == "" {
+		os.Setenv("CHAINID","5777")
+	}
+
+	if os.Getenv("PRIVKEY") == "" {
+		os.Setenv("ad92041b60126af952f8320b473ccb555d7274a53f1c27e12d2f1ea8aaecda7b","5777")
 	}
 
 
@@ -46,7 +55,11 @@ func main() {
 	// Launch events checking
 	go checkEvents()
 
-	loadTestAccount("0xFDb59BC058eFde421AdF049F27d3A03a4cedea2f", "ad92041b60126af952f8320b473ccb555d7274a53f1c27e12d2f1ea8aaecda7b")
+	// Man routine
+	//loadTestAccount("0xFDb59BC058eFde421AdF049F27d3A03a4cedea2f", "ad92041b60126af952f8320b473ccb555d7274a53f1c27e12d2f1ea8aaecda7b")
+	getTransactOps()
+
+
 	// Main routine stuck in inf loop
 	for true {
 		//fmt.Println("s")

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"crypto/ecdsa"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -9,11 +8,14 @@ import (
 	"log"
 	"math/big"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
+
+var tops *bind.TransactOpts
 
 func ContactBlockchain(url string) error {
 	// Dial address: ganache in localhost
@@ -159,37 +161,18 @@ func loadTestAccount(pubKeyStr string, privKeyStr string){
 
 	fmt.Printf("%x\n", pubAddrStr)
 	fmt.Printf("%x\n",*(&privateKey.D))
+}
 
+func getTransactOps() {
 	// Dial the ganache instance
-	client, err := ethclient.Dial("http://localhost:9545")
+	client, _ := ethclient.Dial("http://localhost:9545")
+	client=client
+	privateKey, _ := crypto.HexToECDSA(os.Getenv("PRIVKEY"))
 
-	if err != nil {
-		fmt.Println("Error dialing the blockchain")
-	}
-
-	// Get the nonce
-	nonce, err := client.PendingBalanceAt(context.Background(), pubAddrStr)
-
-	if err != nil {
-		fmt.Println("Error getting nonce (",nonce,")")
-	}
-
-	gasPrice,err := client.SuggestGasPrice(context.Background())
-	if err != nil {
-		fmt.Println("Error getting gas price (",gasPrice,")")
-	}
-
-	// Set-up transaction ops with data retrieved
-	tops := bind.NewKeyedTransactor(privateKey)
-	tops.Nonce = nonce
-	tops.Value = big.NewInt(0)
-	tops.GasLimit = uint64(6721975)
-	tops.GasPrice = big.NewInt(3000)
-
-	address, tx, instance, err := DeployMain(tops,client)
+	//func NewKeyedTransactorWithChainID(key *ecdsa.PrivateKey, chainID *big.Int) (*TransactOpts, error)
+	chainId,_ :=strconv.Atoi(os.Getenv("CHAINID"))
+	tops, _ := bind.NewKeyedTransactorWithChainID(privateKey,big.NewInt(int64(chainId)))
 	// Client.Close needed for ending the communication
 
-	fmt.Println(address,tx,instance)
-	fmt.Println(tx)
-	fmt.Println(instance)
+	fmt.Println(tops)
 }
