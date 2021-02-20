@@ -44,7 +44,7 @@ func main() {
 	}
 
 	if os.Getenv("PRIVKEY") == "" {
-		os.Setenv("ad92041b60126af952f8320b473ccb555d7274a53f1c27e12d2f1ea8aaecda7b","5777")
+		os.Setenv("PRIVKEY","ad92041b60126af952f8320b473ccb555d7274a53f1c27e12d2f1ea8aaecda7b")
 	}
 
 
