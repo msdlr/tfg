@@ -30,10 +30,11 @@ func main() {
 		Check&set envvars
 	*/
 
-	// ETHereum KeyStore path
+	// Ethereum KeyStore path (Unused when usin ganache as infrastructure)
+	/*
 	if os.Getenv("ETHKS") == "" {
 		os.Setenv("ETHKS", os.Getenv("HOME")+"/eth/node1/keystore")
-	}
+	}*/
 
 	// Peer for connecting to the blockchain
 	if os.Getenv("RPCENDPOINT") == "" {
@@ -54,29 +55,32 @@ func main() {
 	if os.Getenv("PRIVKEY") == "" {
 		os.Setenv("PRIVKEY","ad92041b60126af952f8320b473ccb555d7274a53f1c27e12d2f1ea8aaecda7b")
 	}
+	// Ethereum public key
+	if os.Getenv("PUBKEY") == "" {
+		os.Setenv("PUBKEY","FDb59BC058eFde421AdF049F27d3A03a4cedea2f")
+	}
 
 
 	/* Set up keystore with the correct path */
-	ks = keystore.NewKeyStore(os.Getenv("ETHKS"), keystore.StandardScryptN, keystore.StandardScryptP)
+	//ks = keystore.NewKeyStore(os.Getenv("ETHKS"), keystore.StandardScryptN, keystore.StandardScryptP)
 
 	// Retrieve TransactionOps and client object
-	myTrOps, myClient := setupClient()
+	myTrOps, myClient := setupClient(os.Getenv("PRIVKEY"))
 
 	// DeployMain(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *Main, error)
 	addr, trans, main, err := DeployMain(myTrOps, myClient)
-	main = main
 
 	if err == nil {
 		fmt.Println("## NEW CONTRACT DEPLOYED ##")
-		fmt.Println("Address: ", addr.Hex())
-		fmt.Println("Transaction hash: ", trans.Hash())
-		fmt.Println("Gas Used: ", trans.Gas(), "(price:", trans.GasPrice(), ")")
-		fmt.Println("Nonce: ", trans.Nonce())
+		fmt.Println("Address:\t\t", addr.Hex())
+		fmt.Println("Transaction hash:\t", trans.Hash())
+		fmt.Println("Gas Used:\t\t", trans.Gas(), "(price:", trans.GasPrice(), ")")
+		fmt.Println("Nonce:\t\t\t", trans.Nonce())
 	}
 
-	myPubKey := getPubKeyFromPrivKey(os.Getenv("PRIVKEY"))
+	myPubKey := publicAddressFromString(os.Getenv("PUBKEY"))
 
-	main.Initialize(myTrOps, *myPubKey, "msdlr")
+	main.Initialize(myTrOps, myPubKey, "msdlr")
 
 	myClient.Close()
 
@@ -94,9 +98,9 @@ func main() {
 }
 
 // setupClient retrieves the Transaction Ops and dials the RPC endpoint to establish the ethclient.client object
-func setupClient() (*bind.TransactOpts, *ethclient.Client) {
+func setupClient(privKeyStr string) (*bind.TransactOpts, *ethclient.Client) {
 	/* Set-up client */
-	privateKey, _ := crypto.HexToECDSA(os.Getenv("PRIVKEY"))
+	privateKey, _ := crypto.HexToECDSA(privKeyStr)
 	chainId, _ := strconv.Atoi(os.Getenv("CHAINID"))
 	transactOps, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(int64(chainId)))
 	if err != nil {
@@ -105,6 +109,11 @@ func setupClient() (*bind.TransactOpts, *ethclient.Client) {
 
 	client, err := ethclient.Dial(os.Getenv("RPCENDPOINT"))
 	return transactOps, client
+}
+
+// publicAddressFromString generates a common.Address object from a string which represents a public key
+func publicAddressFromString(pubKeyStr string) common.Address {
+	return common.HexToAddress(pubKeyStr)
 }
 
 // getPubKeyFromPrivKey derives a public address corresponding to the private one passed as an argument
