@@ -59,6 +59,11 @@ func main() {
 		os.Setenv("PUBKEY", "FDb59BC058eFde421AdF049F27d3A03a4cedea2f")
 	}
 
+	// Ethereum public key
+	if os.Getenv("USERNAME") == "" {
+		os.Setenv("USERNAME", "msdlr")
+	}
+
 	// endregion
 
 	/* Set up keystore with the correct path */
@@ -66,22 +71,7 @@ func main() {
 
 	// Retrieve TransactionOps and client object
 	myTrOps, myClient := setupClient(os.Getenv("PRIVKEY"))
-
-	// DeployMain(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *Main, error)
-	addr, trans, main, err := DeployMain(myTrOps, myClient)
-
-	if err == nil {
-		fmt.Println("## NEW CONTRACT DEPLOYED ##")
-		fmt.Println("Address:\t\t", addr.Hex())
-		fmt.Println("Transaction hash:\t", trans.Hash())
-		fmt.Println("Gas Used:\t\t", trans.Gas(), "(price:", trans.GasPrice(), ")")
-		fmt.Println("Nonce:\t\t\t", trans.Nonce())
-	}
-
-	myPubKey := publicAddressFromString(os.Getenv("PUBKEY"))
-
-	main.Initialize(myTrOps, myPubKey, "msdlr")
-
+	deployAndInitialize(myTrOps, myClient,os.Getenv("PUBKEY"),os.Getenv("USERNAME"))
 	myClient.Close()
 
 	/*
@@ -96,6 +86,7 @@ func main() {
 
 	*/
 }
+
 
 // setupClient retrieves the Transaction Ops and dials the RPC endpoint to establish the ethclient.client object
 func setupClient(privKeyStr string) (tops *bind.TransactOpts, c *ethclient.Client) {
