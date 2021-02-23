@@ -98,7 +98,7 @@ func main() {
 }
 
 // setupClient retrieves the Transaction Ops and dials the RPC endpoint to establish the ethclient.client object
-func setupClient(privKeyStr string) (*bind.TransactOpts, *ethclient.Client) {
+func setupClient(privKeyStr string) (tops *bind.TransactOpts, c *ethclient.Client) {
 	/* Set-up client */
 	privateKey, _ := crypto.HexToECDSA(privKeyStr)
 	chainId, _ := strconv.Atoi(os.Getenv("CHAINID"))
@@ -150,3 +150,5 @@ func getPubKeyFromPrivKey(privKeyStr string) (pubk *common.Address) {
 	pubAddr := crypto.PubkeyToAddress(*publicKeyECDSA)
 	return &pubAddr
 }
+
+// endregion
