@@ -24,7 +24,6 @@ func initializeValidClient(endpoint string,chainId uint16,privkey string)(tops *
 
 	return
 }
-
 // endregion
 
 func TestDeployOk(t *testing.T){
@@ -60,6 +59,8 @@ func TestDeployOk(t *testing.T){
 		fmt.Println("Error:"+err.Error())
 	}
 }
+
+// region function: addUser
 
 func TestAddUserOk(t *testing.T){
 	/* Arrange: We need an initialized contract */
@@ -193,7 +194,9 @@ func TestAddUserNotOk(t *testing.T) {
 	}
 }
 
+//endregion
 
+// region function: rmUser
 func TestRemoveUserOk(t *testing.T ){
 	/* Arrange: We need an initialized contract with a user in it */
 
@@ -212,7 +215,7 @@ func TestRemoveUserOk(t *testing.T ){
 	registeredBeforRemoving, _ := main.GetUserRegistered(nil,userAddr)
 
 	/* Act: Call rmUser */
-	main.RmUser(to,userAddr,userNickname)
+	_, rmError := main.RmUser(to,userAddr,userNickname)
 
 	/* Assert: check if user is not registered now */
 	registeredAfterRemoving, _ := main.GetUserRegistered(nil,userAddr)
@@ -221,9 +224,40 @@ func TestRemoveUserOk(t *testing.T ){
 	addressForUserName, _ := main.GetUserAddress(nil,userNickname) // Address for the username after removing the user
 
 	if registeredBeforRemoving == registeredAfterRemoving ||
+		rmError != nil ||
 		isAdmin == true ||
 		loggedIn == true ||
 		addressForUserName.String() != publicAddressFromString("0x0").String()	{
 		t.Errorf("User was not properly removed")
 	}
 }
+
+func TestRemoveOwner(t *testing.T ){
+
+}
+
+func TestRemoveMismatching(t *testing.T ){
+
+}
+// endregion
+
+// region function: promoteUser
+func TestPromoteUserOk(t *testing.T) {
+
+}
+
+func TestPromoteUserFailed(t *testing.T) {
+
+}
+
+// endregion
+
+// region func demoteAdmin
+func TestDemoteAdminOk(t *testing.T) {
+
+}
+
+func TestDemoteAdminFailed(t *testing.T) {
+
+}
+// endregion
