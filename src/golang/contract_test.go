@@ -62,7 +62,7 @@ func TestDeployOk(t *testing.T){
 }
 
 func TestAddUserOk(t *testing.T){
-	// Arrange: We need an initialized contract
+	/* Arrange: We need an initialized contract */
 
 	ownerPub := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5" // [1]
 	ownerPriv := "b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4"
@@ -73,11 +73,11 @@ func TestAddUserOk(t *testing.T){
 	to,c := initializeValidClient("http://localhost:7545",5777,ownerPriv)
 	_, _, main, _, _, _ :=deployAndInitialize(to,c,ownerPub,"TestOwner")
 
-	// Act: Call contract method AddUser
+	/* Act: Call contract method AddUser */
 	userAddr := publicAddressFromString(newUserPub)
 	_, addUserErr := main.AddUser(to, userAddr, newUserName)
 
-	// Assert
+	/* Assert */
 	if addUserErr != nil {
 		t.Errorf("Could not add user."+ addUserErr.Error())
 	}
@@ -140,5 +140,55 @@ func TestAddUserOk(t *testing.T){
 	userAuthStr := userAuthContract.String()
 	if userAuthStr == common.BytesToAddress([]byte("0")).String() {
 		t.Errorf("Error retrieving user's AuthContract")
+	}
+}
+
+// Try to register a user with a username taken, and a username that is already registered
+func TestAddUserWithSameIDorUserName(t *testing.T) {
+	/* Arrange: We need an initialized contract with a user in it */
+
+	ownerPub := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5" // [1]
+	ownerPriv := "b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4"
+
+	userPub := "0x12b3C6913a8eE35D1e0462f16Ac0aA6B6205a91a" // [2]
+	userNickname := "testUser"
+
+	newUserPub := "0xa0A9e0409f8A0e03f41e1AAd5Bb19E86C4fE5Acc" // [3]
+
+
+	to,c := initializeValidClient("http://localhost:7545",5777,ownerPriv)
+	_, _, main, _, _, _ :=deployAndInitialize(to,c,ownerPub,"TestOwner")
+
+	userAddr := publicAddressFromString(userPub) // Call contract method AddUser
+	_, _ = main.AddUser(to, userAddr, userNickname)
+
+
+	/* Act: Try to add another different user with the same username */
+
+	newUserAddr := publicAddressFromString(newUserPub)
+	_, err1 := main.AddUser(to, newUserAddr, userNickname)
+
+	/* Act: Try to add a user already on the system */
+
+	_, err2 := main.AddUser(to, userAddr, userNickname+"1")
+
+	/* Assert: is the new user registered with the same username as the existing one? */
+
+	newUserRegistered, _ := main.GetUserRegistered(nil, newUserAddr)
+
+	if newUserRegistered {
+		t.Errorf("A second user was created with the same username")
+	}
+
+	/* Assert: check if a user is registered twice with to different usernames, it should be address 0 (username not taken) */
+
+	shouldBeAddress0, _:= main.GetUserAddress(nil, userNickname+"1")
+
+	if shouldBeAddress0.String() == userAddr.String() {
+		t.Errorf("Username was registered twice")
+	}
+
+	if err1 == nil || err2 == nil {
+		t.Errorf(err1.Error()+"\n"+err2.Error())
 	}
 }
