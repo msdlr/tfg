@@ -26,9 +26,27 @@ func initializeValidClient(endpoint string,chainId uint16,privkey string)(tops *
 }
 // endregion
 
+var (
+	ownerAddressStr = "0xFDb59BC058eFde421AdF049F27d3A03a4cedea2f" // [0]
+	ownerPrivKey = "ad92041b60126af952f8320b473ccb555d7274a53f1c27e12d2f1ea8aaecda7b"
+
+	admin2AddressStr = "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5" // [1]
+	admin2PrivKey = "b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4"
+
+	user1AddressStr = "0x12b3C6913a8eE35D1e0462f16Ac0aA6B6205a91a" // [2]
+	user1PrivKey = "e7c911fedc61cc1fd1a7a1cb84fd449562709cfa16a39f228cca07158c7307fb"
+
+	user2AddressStr = "0xD03A8E7E2265CD8239F34909324F98F00496EA31" // [3]
+	user2PrivKey = "7aa5be5263617d40346f8dc8d32f59a6cc6443bbf8d164bc1b89170f2d0679af"
+
+	chainIdStr = "chainId"
+	chainId uint16 = 5777
+	rpcEndpoint = "http://localhost:7545"
+)
+
 func TestDeployOk(t *testing.T){
 	/* Arrange: create valid client */
-	to,c := initializeValidClient("http://localhost:7545",5777,"b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4")
+	to,c := initializeValidClient(rpcEndpoint,chainId,"b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4")
 
 	/* Act: deploy and initialize general contract */
 	addr, deployTrans, main, deployError, initTrans, initError :=deployAndInitialize(to,c,"0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5","TestOwner")
@@ -66,7 +84,7 @@ func TestAddUserOk(t *testing.T){
 	newuserPubStr := "0x12b3C6913a8eE35D1e0462f16Ac0aA6B6205a91a" // [2]
 	newUserName := "testUser"
 
-	to,c := initializeValidClient("http://localhost:7545",5777,ownerPrivStr)
+	to,c := initializeValidClient(rpcEndpoint,chainId,ownerPrivStr)
 	_, _, main, _, _, _ :=deployAndInitialize(to,c, ownerAddrStr,"TestOwner")
 
 	registeredBeforeAdd, _ := main.GetUserRegistered(nil, string2Address(newuserPubStr))
@@ -146,7 +164,7 @@ func TestAddUserAlreadyTaken(t *testing.T) {
 	newuserPubStr := "0xa0A9e0409f8A0e03f41e1AAd5Bb19E86C4fE5Acc" // [3]
 
 
-	to,c := initializeValidClient("http://localhost:7545",5777,ownerPrivStr)
+	to,c := initializeValidClient(rpcEndpoint,chainId,ownerPrivStr)
 	_, _, main, _, _, _ :=deployAndInitialize(to,c, ownerAddrStr,"TestOwner")
 
 	userAddr := string2Address(userPubStr) // Call contract method AddUser
@@ -195,8 +213,8 @@ func TestAddUserWithoutPermission(t *testing.T) {
 	otherUserAddrStr := "0x045C24525C46DBfaA8CfF3EA6C48a0e877777bFF"
 
 	/* Arrange: 2 clients and 3 users in the system, one is the contract owner, and a user tries to delete another non-admin */
-	adminTransOps, adminClient := initializeValidClient("http://localhost:7545", 5777, ownerPrivKey) // [0]
-	userTransOps, userClient := initializeValidClient("http://localhost:7545", 5777, userPrivKey)    // [1]
+	adminTransOps, adminClient := initializeValidClient(rpcEndpoint, chainId, ownerPrivKey) // [0]
+	userTransOps, userClient := initializeValidClient(rpcEndpoint, chainId, userPrivKey)    // [1]
 	contractAddress, _, adminMain, _, _, _ := deployAndInitialize(adminTransOps, adminClient, ownerAddrStr, "TestOwner")
 	userMain, _ := NewMain(contractAddress, userClient)
 
@@ -224,7 +242,7 @@ func TestRemoveUserOk(t *testing.T ){
 	userPubStr := "0x12b3C6913a8eE35D1e0462f16Ac0aA6B6205a91a" // [2]
 	userNickname := "testUser"
 
-	to,c := initializeValidClient("http://localhost:7545",5777,ownerPrivStr)
+	to,c := initializeValidClient(rpcEndpoint,chainId,ownerPrivStr)
 	_, _, main, _, _, _ :=deployAndInitialize(to,c, ownerAddrStr,"TestOwner")
 
 	userAddr := string2Address(userPubStr) // Call contract method AddUser
@@ -253,7 +271,7 @@ func TestRemoveOwner(t *testing.T ){
 
 	ownerAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5" // [1]
 	ownerPrivStr := "b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4"
-	to,c := initializeValidClient("http://localhost:7545",5777,ownerPrivStr)
+	to,c := initializeValidClient(rpcEndpoint,chainId,ownerPrivStr)
 	_, _, main, _, _, _ :=deployAndInitialize(to,c, ownerAddrStr,"TestOwner")
 
 	registeredBeforeRemoving, _ := main.GetUserRegistered(nil, string2Address(ownerAddrStr))
@@ -275,7 +293,7 @@ func TestRemoveMismatching(t *testing.T ){
 
 	ownerAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5" // [1]
 	ownerPrivStr := "b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4"
-	to,c := initializeValidClient("http://localhost:7545",5777,ownerPrivStr)
+	to,c := initializeValidClient(rpcEndpoint,chainId,ownerPrivStr)
 	_, _, main, _, _, _ :=deployAndInitialize(to,c, ownerAddrStr,"TestOwner")
 
 	userPubStr := "0x12b3C6913a8eE35D1e0462f16Ac0aA6B6205a91a" // [2]
@@ -306,8 +324,8 @@ func TestRemoveWithoutPermission(t *testing.T) {
 	otherUserAddrStr := "0x045C24525C46DBfaA8CfF3EA6C48a0e877777bFF"
 
 	/* Arrange: 2 clients and 3 users in the system, one is the contract owner, and a user tries to delete another non-admin */
-	adminTransOps,adminClient := initializeValidClient("http://localhost:7545",5777,ownerPrivKey) // [0]
-	userTransOps,userClient := initializeValidClient("http://localhost:7545",5777,userPrivKey) // [1]
+	adminTransOps,adminClient := initializeValidClient(rpcEndpoint,chainId,ownerPrivKey) // [0]
+	userTransOps,userClient := initializeValidClient(rpcEndpoint,chainId,userPrivKey) // [1]
 	contractAddress, _, adminMain, _, _, _ :=deployAndInitialize(adminTransOps,adminClient, ownerAddrStr,"TestOwner")
 	userMain, _ := NewMain(contractAddress,userClient)
 
@@ -338,7 +356,7 @@ func TestPromoteUserOk(t *testing.T) {
 	userPubStr := "0x12b3C6913a8eE35D1e0462f16Ac0aA6B6205a91a" // [2]
 	userNickname := "testUser"
 
-	to,c := initializeValidClient("http://localhost:7545",5777,ownerPrivStr)
+	to,c := initializeValidClient(rpcEndpoint,chainId,ownerPrivStr)
 	_, _, main, _, _, _ :=deployAndInitialize(to,c, ownerAddrStr,"TestOwner")
 
 	userAddr := string2Address(userPubStr) // Call contract method AddUser
@@ -365,7 +383,7 @@ func TestPromoteUserNonExisting(t *testing.T) {
 
 	userPubStr := "0x12b3C6913a8eE35D1e0462f16Ac0aA6B6205a91a" // [2]
 
-	to,c := initializeValidClient("http://localhost:7545",5777,ownerPrivStr)
+	to,c := initializeValidClient(rpcEndpoint,chainId,ownerPrivStr)
 	_, _, main, _, _, _ :=deployAndInitialize(to,c, ownerAddrStr,"TestOwner")
 
 	// User is not even on the system
@@ -394,8 +412,8 @@ func TestPromoteUserWithoutPermission(t *testing.T) {
 	otherUserAddrStr := "0x045C24525C46DBfaA8CfF3EA6C48a0e877777bFF"
 
 	/* Arrange: 2 clients and 3 users in the system, one is the contract owner, and a user tries to delete another non-admin */
-	adminTransOps,adminClient := initializeValidClient("http://localhost:7545",5777,ownerPrivKey) // [0]
-	userTransOps,userClient := initializeValidClient("http://localhost:7545",5777,userPrivKey) // [1]
+	adminTransOps,adminClient := initializeValidClient(rpcEndpoint,chainId,ownerPrivKey) // [0]
+	userTransOps,userClient := initializeValidClient(rpcEndpoint,chainId,userPrivKey) // [1]
 	contractAddress, _, adminMain, _, _, _ :=deployAndInitialize(adminTransOps,adminClient, ownerAddrStr,"TestOwner")
 	userMain, _ := NewMain(contractAddress,userClient)
 
@@ -424,7 +442,7 @@ func TestDemoteAdminOk(t *testing.T) {
 	userAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5"
 
 	/* Arrange: Valid contract with two administrators */
-	adminTransOps,adminClient := initializeValidClient("http://localhost:7545",5777,ownerPrivKey) // [0]
+	adminTransOps,adminClient := initializeValidClient(rpcEndpoint,chainId,ownerPrivKey) // [0]
 	_, _, adminMain, _, _, _ :=deployAndInitialize(adminTransOps,adminClient, ownerAddrStr,"TestOwner")
 
 	adminMain.AddUser(adminTransOps,string2Address(userAddrStr),"newUser")
@@ -449,7 +467,7 @@ func TestDemoteNonExistentUser(t *testing.T) {
 	userAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5"
 
 	/* Arrange: Valid contract, no users */
-	adminTransOps,adminClient := initializeValidClient("http://localhost:7545",5777,ownerPrivKey) // [0]
+	adminTransOps,adminClient := initializeValidClient(rpcEndpoint,chainId,ownerPrivKey) // [0]
 	_, _, adminMain, _, _, _ :=deployAndInitialize(adminTransOps,adminClient, ownerAddrStr,"TestOwner")
 	// Mini-assert: user is not registered -> isAdmin = false
 	wasAdmin, _ := adminMain.GetUserAdmin(nil,string2Address(userAddrStr))
@@ -477,8 +495,8 @@ func TestDemoteWithoutPermission(t *testing.T) {
 	userPrivkey := "81ed56f988ec5cf9c1adccc35ae4d0aa118dda78cfaa80ccfc29c4aec2ca35d0"
 
 	/* Arrange: 2 clients and 3 users in the system, one is the contract owner, and a user tries to delete another non-admin */
-	ownerTransOps, ownerClient := initializeValidClient("http://localhost:7545",5777,ownerPrivKey) // [0]
-	userTransOps,userClient := initializeValidClient("http://localhost:7545",5777, userPrivkey) // [4]
+	ownerTransOps, ownerClient := initializeValidClient(rpcEndpoint,chainId,ownerPrivKey) // [0]
+	userTransOps,userClient := initializeValidClient(rpcEndpoint,chainId, userPrivkey) // [4]
 	contractAddress, _, adminMain, _, _, _ :=deployAndInitialize(ownerTransOps, ownerClient, ownerAddrStr,"TestOwner")
 	userMain, _ := NewMain(contractAddress,userClient)
 
