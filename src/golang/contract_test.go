@@ -357,7 +357,7 @@ func TestPromoteUserOk(t *testing.T) {
 	/* Assert event */
 }
 
-func TestNonExistingPromoteUser(t *testing.T) {
+func TestPromoteUserNonExisting(t *testing.T) {
 	/* Arrange: We need an initialized contract with a user in it */
 
 	ownerAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5" // [1]
@@ -369,8 +369,7 @@ func TestNonExistingPromoteUser(t *testing.T) {
 	_, _, main, _, _, _ :=deployAndInitialize(to,c, ownerAddrStr,"TestOwner")
 
 	// User is not even on the system
-	//userAddr := string2Address(userPubStr) // Call contract method AddUser
-	// _, _ = main.AddUser(to, userAddr, userNickname)
+	wasUserAdmin,_ := main.GetUserAdmin(nil,string2Address(userPubStr))
 
 	/* Act: promotion of user to admin */
 	_, promoteErr := main.PromoteUser(to,string2Address(userPubStr))
@@ -378,18 +377,18 @@ func TestNonExistingPromoteUser(t *testing.T) {
 	/* Assert: user is admin now */
 	isUserAdminNow, _ := main.GetUserAdmin(nil,string2Address(userPubStr))
 
-	if isUserAdminNow || promoteErr == nil {
+	if isUserAdminNow != wasUserAdmin || promoteErr == nil {
 		t.Errorf("User not in the system was promoted to admin")
 	}
 }
 
 func TestPromoteUserWithoutPermission(t *testing.T) {
 	// ContractOwner
+	ownerAddrStr := "0xFDb59BC058eFde421AdF049F27d3A03a4cedea2f"
 	ownerPrivKey := "ad92041b60126af952f8320b473ccb555d7274a53f1c27e12d2f1ea8aaecda7b"
-	userPrivKey := "b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4"
 	// User that tries to remove a non-admin user
 	userAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5"
-	ownerAddrStr := "0xFDb59BC058eFde421AdF049F27d3A03a4cedea2f"
+	userPrivKey := "b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4"
 
 	// User that is tried to be promoted
 	otherUserAddrStr := "0x045C24525C46DBfaA8CfF3EA6C48a0e877777bFF"
@@ -418,10 +417,83 @@ func TestPromoteUserWithoutPermission(t *testing.T) {
 
 // region func demoteAdmin
 func TestDemoteAdminOk(t *testing.T) {
+	// ContractOwner
+	ownerAddrStr := "0xFDb59BC058eFde421AdF049F27d3A03a4cedea2f"
+	ownerPrivKey := "ad92041b60126af952f8320b473ccb555d7274a53f1c27e12d2f1ea8aaecda7b"
+	// User that tries to remove a non-admin user
+	userAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5"
 
+	/* Arrange: Valid contract with two administrators */
+	adminTransOps,adminClient := initializeValidClient("http://localhost:7545",5777,ownerPrivKey) // [0]
+	_, _, adminMain, _, _, _ :=deployAndInitialize(adminTransOps,adminClient, ownerAddrStr,"TestOwner")
+
+	adminMain.AddUser(adminTransOps,string2Address(userAddrStr),"newUser")
+	adminMain.PromoteUser(adminTransOps,string2Address(userAddrStr)) // Promote user, now two admins in the system
+
+	/* Act: owner demotes new admin */
+	_, demoteErr := adminMain.DemoteAdmin(adminTransOps,string2Address(userAddrStr))
+
+	/* Assert: the other user should no longer be admin */
+	isAdmin, _ := adminMain.GetUserAdmin(nil,string2Address(userAddrStr))
+
+	if demoteErr != nil || isAdmin {
+		t.Errorf("User is admin (expected: not admin)")
+	}
 }
 
-func TestDemoteAdminFailed(t *testing.T) {
+func TestDemoteNonExistentUser(t *testing.T) {
+	// ContractOwner
+	ownerAddrStr := "0xFDb59BC058eFde421AdF049F27d3A03a4cedea2f"
+	ownerPrivKey := "ad92041b60126af952f8320b473ccb555d7274a53f1c27e12d2f1ea8aaecda7b"
+	// User that tries to promote a non-admin user
+	userAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5"
 
+	/* Arrange: Valid contract, no users */
+	adminTransOps,adminClient := initializeValidClient("http://localhost:7545",5777,ownerPrivKey) // [0]
+	_, _, adminMain, _, _, _ :=deployAndInitialize(adminTransOps,adminClient, ownerAddrStr,"TestOwner")
+	// Mini-assert: user is not registered -> isAdmin = false
+	wasAdmin, _ := adminMain.GetUserAdmin(nil,string2Address(userAddrStr))
+
+	/* Act: owner demotes a user that is not in the system */
+	_, demoteErr := adminMain.DemoteAdmin(adminTransOps,string2Address(userAddrStr))
+
+	/* Assert */
+	isAdmin, _ := adminMain.GetUserAdmin(nil,string2Address(userAddrStr))
+
+	if demoteErr == nil || wasAdmin != isAdmin {
+		t.Errorf("User not in the system is admin (expected: not admin)")
+	}
+}
+
+func TestDemoteWithoutPermission(t *testing.T) {
+	// ContractOwner
+	ownerAddrStr := "0xFDb59BC058eFde421AdF049F27d3A03a4cedea2f"
+	ownerPrivKey := "ad92041b60126af952f8320b473ccb555d7274a53f1c27e12d2f1ea8aaecda7b"
+	// User that tries to remove a non-admin user
+	admin2AddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5"
+
+	// User that is tried to be promoted
+	userAddrStr := "0xa0A9e0409f8A0e03f41e1AAd5Bb19E86C4fE5Acc"
+	userPrivkey := "81ed56f988ec5cf9c1adccc35ae4d0aa118dda78cfaa80ccfc29c4aec2ca35d0"
+
+	/* Arrange: 2 clients and 3 users in the system, one is the contract owner, and a user tries to delete another non-admin */
+	ownerTransOps, ownerClient := initializeValidClient("http://localhost:7545",5777,ownerPrivKey) // [0]
+	userTransOps,userClient := initializeValidClient("http://localhost:7545",5777, userPrivkey) // [4]
+	contractAddress, _, adminMain, _, _, _ :=deployAndInitialize(ownerTransOps, ownerClient, ownerAddrStr,"TestOwner")
+	userMain, _ := NewMain(contractAddress,userClient)
+
+	adminMain.AddUser(ownerTransOps,string2Address(admin2AddrStr),"newAdmin")
+	adminMain.PromoteUser(ownerTransOps,string2Address(admin2AddrStr)) // Promoted to admin
+	adminMain.AddUser(ownerTransOps,string2Address(userAddrStr),"newUser")
+
+	/* Act: the new user tries to demote a user from the system */
+	_, demoteErr := userMain.PromoteUser(userTransOps,string2Address(userAddrStr))
+
+	/* Assert Third user is not expected to be admin */
+	wasAdminDemoted,_ := userMain.GetUserAdmin(nil,string2Address(userAddrStr))
+
+	if demoteErr == nil || wasAdminDemoted {
+		t.Errorf("Non-admin user was able to remove another user")
+	}
 }
 // endregion
