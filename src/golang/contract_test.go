@@ -65,14 +65,14 @@ func TestDeployOk(t *testing.T){
 func TestAddUserOk(t *testing.T){
 	/* Arrange: We need an initialized contract */
 
-	userAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5" // [1]
+	ownerAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5" // [1]
 	ownerPrivStr := "b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4"
 
 	newuserPubStr := "0x12b3C6913a8eE35D1e0462f16Ac0aA6B6205a91a" // [2]
 	newUserName := "testUser"
 
 	to,c := initializeValidClient("http://localhost:7545",5777,ownerPrivStr)
-	_, _, main, _, _, _ :=deployAndInitialize(to,c,userAddrStr,"TestOwner")
+	_, _, main, _, _, _ :=deployAndInitialize(to,c, ownerAddrStr,"TestOwner")
 
 	/* Act: Call contract method AddUser */
 	userAddr := publicAddressFromString(newuserPubStr)
@@ -148,7 +148,7 @@ func TestAddUserOk(t *testing.T){
 func TestAddUserNotOk(t *testing.T) {
 	/* Arrange: We need an initialized contract with a user in it */
 
-	userAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5" // [1]
+	ownerAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5" // [1]
 	ownerPrivStr := "b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4"
 
 	userPubStr := "0x12b3C6913a8eE35D1e0462f16Ac0aA6B6205a91a" // [2]
@@ -158,7 +158,7 @@ func TestAddUserNotOk(t *testing.T) {
 
 
 	to,c := initializeValidClient("http://localhost:7545",5777,ownerPrivStr)
-	_, _, main, _, _, _ :=deployAndInitialize(to,c,userAddrStr,"TestOwner")
+	_, _, main, _, _, _ :=deployAndInitialize(to,c, ownerAddrStr,"TestOwner")
 
 	userAddr := publicAddressFromString(userPubStr) // Call contract method AddUser
 	_, _ = main.AddUser(to, userAddr, userNickname)
@@ -200,14 +200,14 @@ func TestAddUserNotOk(t *testing.T) {
 func TestRemoveUserOk(t *testing.T ){
 	/* Arrange: We need an initialized contract with a user in it */
 
-	userAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5" // [1]
+	ownerAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5" // [1]
 	ownerPrivStr := "b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4"
 
 	userPubStr := "0x12b3C6913a8eE35D1e0462f16Ac0aA6B6205a91a" // [2]
 	userNickname := "testUser"
 
 	to,c := initializeValidClient("http://localhost:7545",5777,ownerPrivStr)
-	_, _, main, _, _, _ :=deployAndInitialize(to,c,userAddrStr,"TestOwner")
+	_, _, main, _, _, _ :=deployAndInitialize(to,c, ownerAddrStr,"TestOwner")
 
 	userAddr := publicAddressFromString(userPubStr) // Call contract method AddUser
 	_, _ = main.AddUser(to, userAddr, userNickname)
@@ -233,6 +233,24 @@ func TestRemoveUserOk(t *testing.T ){
 }
 
 func TestRemoveOwner(t *testing.T ){
+	/* Arrange: We need an initialized contract */
+
+	ownerAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5" // [1]
+	ownerPrivStr := "b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4"
+	to,c := initializeValidClient("http://localhost:7545",5777,ownerPrivStr)
+	_, _, main, _, _, _ :=deployAndInitialize(to,c, ownerAddrStr,"TestOwner")
+
+	registeredBeforeRemoving, _ := main.GetUserRegistered(nil, publicAddressFromString(ownerAddrStr))
+
+	/* Act: try to remove the only user in the system */
+	_, removeErr := main.RmUser(to,publicAddressFromString(ownerAddrStr),"TestOwner")
+
+	/* Assert: error ocurred and user is still registered */
+	registeredAfterRemoving, _ := main.GetUserRegistered(nil, publicAddressFromString(ownerAddrStr))
+
+	if removeErr == nil || registeredBeforeRemoving != registeredAfterRemoving {
+		t.Errorf("The owner was removed from the contract (?)")
+	}
 
 }
 
