@@ -64,17 +64,17 @@ func TestDeployOk(t *testing.T){
 func TestAddUserOk(t *testing.T){
 	/* Arrange: We need an initialized contract */
 
-	ownerPub := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5" // [1]
-	ownerPriv := "b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4"
+	userAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5" // [1]
+	ownerPrivStr := "b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4"
 
-	newUserPub := "0x12b3C6913a8eE35D1e0462f16Ac0aA6B6205a91a" // [2]
+	newuserPubStr := "0x12b3C6913a8eE35D1e0462f16Ac0aA6B6205a91a" // [2]
 	newUserName := "testUser"
 
-	to,c := initializeValidClient("http://localhost:7545",5777,ownerPriv)
-	_, _, main, _, _, _ :=deployAndInitialize(to,c,ownerPub,"TestOwner")
+	to,c := initializeValidClient("http://localhost:7545",5777,ownerPrivStr)
+	_, _, main, _, _, _ :=deployAndInitialize(to,c,userAddrStr,"TestOwner")
 
 	/* Act: Call contract method AddUser */
-	userAddr := publicAddressFromString(newUserPub)
+	userAddr := publicAddressFromString(newuserPubStr)
 	_, addUserErr := main.AddUser(to, userAddr, newUserName)
 
 	/* Assert */
@@ -129,7 +129,7 @@ func TestAddUserOk(t *testing.T){
 
 	getUserStr:= getUserAddress.String()
 
-	if getUserIdStr != newUserName || getUserStr != newUserPub {
+	if getUserIdStr != newUserName || getUserStr != newuserPubStr {
 		t.Errorf("User ID and public key do not match")
 	}
 
@@ -144,28 +144,28 @@ func TestAddUserOk(t *testing.T){
 }
 
 // Try to register a user with a username taken, and a username that is already registered
-func TestAddUserWithSameIDorUserName(t *testing.T) {
+func TestAddUserNotOk(t *testing.T) {
 	/* Arrange: We need an initialized contract with a user in it */
 
-	ownerPub := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5" // [1]
-	ownerPriv := "b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4"
+	userAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5" // [1]
+	ownerPrivStr := "b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4"
 
-	userPub := "0x12b3C6913a8eE35D1e0462f16Ac0aA6B6205a91a" // [2]
+	userPubStr := "0x12b3C6913a8eE35D1e0462f16Ac0aA6B6205a91a" // [2]
 	userNickname := "testUser"
 
-	newUserPub := "0xa0A9e0409f8A0e03f41e1AAd5Bb19E86C4fE5Acc" // [3]
+	newuserPubStr := "0xa0A9e0409f8A0e03f41e1AAd5Bb19E86C4fE5Acc" // [3]
 
 
-	to,c := initializeValidClient("http://localhost:7545",5777,ownerPriv)
-	_, _, main, _, _, _ :=deployAndInitialize(to,c,ownerPub,"TestOwner")
+	to,c := initializeValidClient("http://localhost:7545",5777,ownerPrivStr)
+	_, _, main, _, _, _ :=deployAndInitialize(to,c,userAddrStr,"TestOwner")
 
-	userAddr := publicAddressFromString(userPub) // Call contract method AddUser
+	userAddr := publicAddressFromString(userPubStr) // Call contract method AddUser
 	_, _ = main.AddUser(to, userAddr, userNickname)
 
 
 	/* Act: Try to add another different user with the same username */
 
-	newUserAddr := publicAddressFromString(newUserPub)
+	newUserAddr := publicAddressFromString(newuserPubStr)
 	_, err1 := main.AddUser(to, newUserAddr, userNickname)
 
 	/* Act: Try to add a user already on the system */
@@ -190,5 +190,40 @@ func TestAddUserWithSameIDorUserName(t *testing.T) {
 
 	if err1 == nil || err2 == nil {
 		t.Errorf(err1.Error()+"\n"+err2.Error())
+	}
+}
+
+
+func TestRemoveUserOk(t *testing.T ){
+	/* Arrange: We need an initialized contract with a user in it */
+
+	userAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5" // [1]
+	ownerPrivStr := "b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4"
+
+	userPubStr := "0x12b3C6913a8eE35D1e0462f16Ac0aA6B6205a91a" // [2]
+	userNickname := "testUser"
+
+	to,c := initializeValidClient("http://localhost:7545",5777,ownerPrivStr)
+	_, _, main, _, _, _ :=deployAndInitialize(to,c,userAddrStr,"TestOwner")
+
+	userAddr := publicAddressFromString(userPubStr) // Call contract method AddUser
+	_, _ = main.AddUser(to, userAddr, userNickname)
+
+	registeredBeforRemoving, _ := main.GetUserRegistered(nil,userAddr)
+
+	/* Act: Call rmUser */
+	main.RmUser(to,userAddr,userNickname)
+
+	/* Assert: check if user is not registered now */
+	registeredAfterRemoving, _ := main.GetUserRegistered(nil,userAddr)
+	isAdmin, _ := main.GetUserAdmin(nil,userAddr)
+	loggedIn, _ := main.GetUserLoggedIn(nil,userAddr)
+	addressForUserName, _ := main.GetUserAddress(nil,userNickname) // Address for the username after removing the user
+
+	if registeredBeforRemoving == registeredAfterRemoving ||
+		isAdmin == true ||
+		loggedIn == true ||
+		addressForUserName.String() != publicAddressFromString("0x0").String()	{
+		t.Errorf("User was not properly removed")
 	}
 }
