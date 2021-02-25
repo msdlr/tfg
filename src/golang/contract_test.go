@@ -245,6 +245,27 @@ func TestRemoveOwner(t *testing.T ){
 }
 
 func TestRemoveMismatching(t *testing.T ){
+	/* Arrange: We need an initialized contract */
+
+	ownerAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5" // [1]
+	ownerPrivStr := "b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4"
+	to,c := initializeValidClient("http://localhost:7545",5777,ownerPrivStr)
+	_, _, main, _, _, _ :=deployAndInitialize(to,c, ownerAddrStr,"TestOwner")
+
+	userPubStr := "0x12b3C6913a8eE35D1e0462f16Ac0aA6B6205a91a" // [2]
+	userNickname := "testUser"
+
+	_, _ = main.AddUser(to, publicAddressFromString(userPubStr), userNickname)
+
+	/* Act: call rmUser on whoever with mismatching username and address, should fail */
+	_, rmErr := main.RmUser(to,publicAddressFromString(userPubStr),"testUser2") // testUser2 is address 0x0...0 (unregistered)
+
+	/* Assert: error ocurred, user is not removed */
+	userRegistered,_  := main.GetUserRegistered(nil,publicAddressFromString(userPubStr))
+
+	if rmErr == nil || !userRegistered {
+		t.Errorf("User was removed from the system: "+rmErr.Error())
+	}
 
 }
 // endregion
