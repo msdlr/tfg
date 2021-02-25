@@ -51,12 +51,8 @@ func TestDeployOk(t *testing.T){
 	addrGet,err :=  main.GetContractAddress(nil)
 	addrGetStr := addrGet.String()
 
-	if addrGetStr != addrStr {
-		t.Errorf("Created contract address differs from getter")
-	}
-
-	if err != nil {
-		fmt.Println("Error:"+err.Error())
+	if addrGetStr != addrStr || err != nil{
+		t.Errorf("Created contract address differs from getter "+err.Error())
 	}
 }
 
@@ -74,11 +70,17 @@ func TestAddUserOk(t *testing.T){
 	to,c := initializeValidClient("http://localhost:7545",5777,ownerPrivStr)
 	_, _, main, _, _, _ :=deployAndInitialize(to,c, ownerAddrStr,"TestOwner")
 
-	/* Act: Call contract method AddUser */
+	registeredBeforeAdd, _ := main.GetUserRegistered(nil,publicAddressFromString(newuserPubStr))
+
 	userAddr := publicAddressFromString(newuserPubStr)
 	_, addUserErr := main.AddUser(to, userAddr, newUserName)
 
 	/* Assert */
+
+	if registeredBeforeAdd {
+		t.Errorf("User is already registered")
+	}
+
 	if addUserErr != nil {
 		t.Errorf("Could not add user."+ addUserErr.Error())
 	}
@@ -86,33 +88,21 @@ func TestAddUserOk(t *testing.T){
 	// Check if registered via getter
 	isUserRegistered, userRegisteredErr := main.GetUserRegistered(nil, userAddr)
 
-	if userRegisteredErr != nil {
-		t.Errorf("Error retrieving if user is registered "+ userRegisteredErr.Error())
-	}
-
-	if !isUserRegistered {
-		t.Errorf("User is not registered (false, expected true)")
+	if userRegisteredErr != nil  || !isUserRegistered {
+		t.Errorf("Error retrieving if user is registered (false, expected true) "+ userRegisteredErr.Error())
 	}
 
 	// Check if admin via getter
 	isUserAdmin, userAdminErr := main.GetUserAdmin(nil, userAddr)
 
-	if userAdminErr != nil {
-		t.Errorf("Error retrieving if user is registered "+ userAdminErr.Error())
-	}
-
-	if isUserAdmin {
-		t.Errorf("User is admin (true, expected false)")
+	if userAdminErr != nil || isUserAdmin{
+		t.Errorf("User is admin (true, expected false) "+ userAdminErr.Error())
 	}
 
 	// Check user attempts via getter
 	attempts, attemptsErr := main.GetUserAttempts(nil, userAddr)
 
-	if attemptsErr != nil {
-		t.Errorf("Error getting user attempts"+ userAdminErr.Error())
-	}
-
-	if attempts > 0 {
+	if attemptsErr != nil || attempts > 0 {
 		t.Errorf("Error, attempts="+string(attempts) +", expected 0"+ userAdminErr.Error())
 	}
 
