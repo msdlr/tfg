@@ -22,7 +22,7 @@ func deployAndInitialize(myTrOps *bind.TransactOpts, myClient *ethclient.Client,
 		fmt.Println("Nonce:\t\t\t", trans.Nonce())
 	}
 	 */
-	myPubKey := publicAddressFromString(ownerPubKeyStr)
+	myPubKey := string2Address(ownerPubKeyStr)
 	initTrans,initError = mainObj.Initialize(myTrOps, myPubKey, ownerUserName)
 	return
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/ecdsa"
 	"fmt"
 	"log"
 	"math/big"
@@ -21,8 +20,7 @@ import (
 */
 
 /* GLOBAL VARS */
-// keystore to use ethereum keys
-var ks *keystore.KeyStore      //Keystore
+var ks *keystore.KeyStore      //Keystore for ethereum keys
 var myTrOps *bind.TransactOpts // Transaction Ops
 var myClient *ethclient.Client // Client retrieved after dialing the RPC endpoint
 
@@ -117,14 +115,13 @@ func checkEvents() {
 	}
 }
 
-// region Ethereum addresses
-
-// publicAddressFromString generates a common.Address object from a string which represents a public key
-func publicAddressFromString(pubKeyStr string) common.Address {
+// string2Address parses a common.Address object from a string
+func string2Address(pubKeyStr string) common.Address {
 	return common.HexToAddress(pubKeyStr)
 }
 
 // getPubKeyFromPrivKey derives a public address corresponding to the private one passed as an argument
+/*
 func getPubKeyFromPrivKey(privKeyStr string) (pubk *common.Address) {
 	// String -> private key object
 	privateKey, err := crypto.HexToECDSA(privKeyStr)
@@ -141,5 +138,4 @@ func getPubKeyFromPrivKey(privKeyStr string) (pubk *common.Address) {
 	pubAddr := crypto.PubkeyToAddress(*publicKeyECDSA)
 	return &pubAddr
 }
-
-// endregion
+*/

@@ -36,7 +36,7 @@ func TestDeployOk(t *testing.T){
 
 	// Assert
 	addrStr := addr.String()
-	zeroStr := publicAddressFromString("0x0").Hex() // Address is not 0x00...0
+	zeroStr := string2Address("0x0").Hex() // Address is not 0x00...0
 	zeroAddress := strings.Compare(addrStr,zeroStr) == 0
 	if  zeroAddress ||
 		deployTrans == nil ||
@@ -70,9 +70,9 @@ func TestAddUserOk(t *testing.T){
 	to,c := initializeValidClient("http://localhost:7545",5777,ownerPrivStr)
 	_, _, main, _, _, _ :=deployAndInitialize(to,c, ownerAddrStr,"TestOwner")
 
-	registeredBeforeAdd, _ := main.GetUserRegistered(nil,publicAddressFromString(newuserPubStr))
+	registeredBeforeAdd, _ := main.GetUserRegistered(nil, string2Address(newuserPubStr))
 
-	userAddr := publicAddressFromString(newuserPubStr)
+	userAddr := string2Address(newuserPubStr)
 	_, addUserErr := main.AddUser(to, userAddr, newUserName)
 
 	/* Assert */
@@ -150,13 +150,13 @@ func TestAddUserNotOk(t *testing.T) {
 	to,c := initializeValidClient("http://localhost:7545",5777,ownerPrivStr)
 	_, _, main, _, _, _ :=deployAndInitialize(to,c, ownerAddrStr,"TestOwner")
 
-	userAddr := publicAddressFromString(userPubStr) // Call contract method AddUser
+	userAddr := string2Address(userPubStr) // Call contract method AddUser
 	_, _ = main.AddUser(to, userAddr, userNickname)
 
 
 	/* Act: Try to add another different user with the same username */
 
-	newUserAddr := publicAddressFromString(newuserPubStr)
+	newUserAddr := string2Address(newuserPubStr)
 	_, err1 := main.AddUser(to, newUserAddr, userNickname)
 
 	/* Act: Try to add a user already on the system */
@@ -199,7 +199,7 @@ func TestRemoveUserOk(t *testing.T ){
 	to,c := initializeValidClient("http://localhost:7545",5777,ownerPrivStr)
 	_, _, main, _, _, _ :=deployAndInitialize(to,c, ownerAddrStr,"TestOwner")
 
-	userAddr := publicAddressFromString(userPubStr) // Call contract method AddUser
+	userAddr := string2Address(userPubStr) // Call contract method AddUser
 	_, _ = main.AddUser(to, userAddr, userNickname)
 
 	registeredBeforRemoving, _ := main.GetUserRegistered(nil,userAddr)
@@ -217,7 +217,7 @@ func TestRemoveUserOk(t *testing.T ){
 		rmError != nil ||
 		isAdmin == true ||
 		loggedIn == true ||
-		addressForUserName.String() != publicAddressFromString("0x0").String()	{
+		addressForUserName.String() != string2Address("0x0").String()	{
 		t.Errorf("User was not properly removed")
 	}
 }
@@ -230,13 +230,13 @@ func TestRemoveOwner(t *testing.T ){
 	to,c := initializeValidClient("http://localhost:7545",5777,ownerPrivStr)
 	_, _, main, _, _, _ :=deployAndInitialize(to,c, ownerAddrStr,"TestOwner")
 
-	registeredBeforeRemoving, _ := main.GetUserRegistered(nil, publicAddressFromString(ownerAddrStr))
+	registeredBeforeRemoving, _ := main.GetUserRegistered(nil, string2Address(ownerAddrStr))
 
 	/* Act: try to remove the only user in the system */
-	_, removeErr := main.RmUser(to,publicAddressFromString(ownerAddrStr),"TestOwner")
+	_, removeErr := main.RmUser(to, string2Address(ownerAddrStr),"TestOwner")
 
 	/* Assert: error ocurred and user is still registered */
-	registeredAfterRemoving, _ := main.GetUserRegistered(nil, publicAddressFromString(ownerAddrStr))
+	registeredAfterRemoving, _ := main.GetUserRegistered(nil, string2Address(ownerAddrStr))
 
 	if removeErr == nil || registeredBeforeRemoving != registeredAfterRemoving {
 		t.Errorf("The owner was removed from the contract (?)")
@@ -255,13 +255,13 @@ func TestRemoveMismatching(t *testing.T ){
 	userPubStr := "0x12b3C6913a8eE35D1e0462f16Ac0aA6B6205a91a" // [2]
 	userNickname := "testUser"
 
-	_, _ = main.AddUser(to, publicAddressFromString(userPubStr), userNickname)
+	_, _ = main.AddUser(to, string2Address(userPubStr), userNickname)
 
 	/* Act: call rmUser on whoever with mismatching username and address, should fail */
-	_, rmErr := main.RmUser(to,publicAddressFromString(userPubStr),"testUser2") // testUser2 is address 0x0...0 (unregistered)
+	_, rmErr := main.RmUser(to, string2Address(userPubStr),"testUser2") // testUser2 is address 0x0...0 (unregistered)
 
 	/* Assert: error ocurred, user is not removed */
-	userRegistered,_  := main.GetUserRegistered(nil,publicAddressFromString(userPubStr))
+	userRegistered,_  := main.GetUserRegistered(nil, string2Address(userPubStr))
 
 	if rmErr == nil || !userRegistered {
 		t.Errorf("User was removed from the system: "+rmErr.Error())
