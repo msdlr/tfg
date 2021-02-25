@@ -27,14 +27,13 @@ func initializeValidClient(endpoint string,chainId uint16,privkey string)(tops *
 // endregion
 
 func TestDeployOk(t *testing.T){
-	// Arrange
+	/* Arrange: create valid client */
 	to,c := initializeValidClient("http://localhost:7545",5777,"b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4")
 
-	// Act
-	// (addr common.Address, deployTrans *types.Transaction, main *Main, deployError error, initTrans *types.Transaction, initError error)
+	/* Act: deploy and initialize general contract */
 	addr, deployTrans, main, deployError, initTrans, initError :=deployAndInitialize(to,c,"0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5","TestOwner")
 
-	// Assert
+	/* Assert contract created properly */
 	addrStr := addr.String()
 	zeroStr := string2Address("0x0").Hex() // Address is not 0x00...0
 	zeroAddress := strings.Compare(addrStr,zeroStr) == 0
@@ -266,6 +265,38 @@ func TestRemoveMismatching(t *testing.T ){
 	if rmErr == nil || !userRegistered {
 		t.Errorf("User was removed from the system: "+rmErr.Error())
 	}
+}
+
+func TestRemoveWithoutPermission(t *testing.T) {
+	// ContractOwner
+	ownerPrivKey := "ad92041b60126af952f8320b473ccb555d7274a53f1c27e12d2f1ea8aaecda7b"
+	userPrivKey := "b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4"
+	// User that tries to remove a non-admin user
+	userAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5"
+	ownerAddrStr := "0xFDb59BC058eFde421AdF049F27d3A03a4cedea2f"
+
+	// User that is tried to be removed
+	otherUserAddrStr := "0x045C24525C46DBfaA8CfF3EA6C48a0e877777bFF"
+
+	/* Arrange: 2 clients and 3 users in the system, one is the contract owner, and a user tries to delete another non-admin */
+	adminTransOps,adminClient := initializeValidClient("http://localhost:7545",5777,ownerPrivKey) // [0]
+	userTransOps,userClient := initializeValidClient("http://localhost:7545",5777,userPrivKey) // [1]
+	contractAddress, _, adminMain, _, _, _ :=deployAndInitialize(adminTransOps,adminClient, ownerAddrStr,"TestOwner")
+	userMain, _ := NewMain(contractAddress,userClient)
+
+	adminMain.AddUser(adminTransOps,string2Address(userAddrStr),"newUser")
+	adminMain.AddUser(adminTransOps,string2Address(otherUserAddrStr),"newUser9") // [9]
+
+	/* Act: the new user tries to remove a user from the system */
+	_, rmErr := userMain.RmUser(userTransOps,string2Address(otherUserAddrStr),"newUser9")
+
+	// Third user is expected to be registered
+	otherUserIsRegistered,_ := userMain.GetUserRegistered(nil,string2Address(otherUserAddrStr))
+
+	if rmErr == nil || !otherUserIsRegistered {
+		t.Errorf("Non-admin user was able to remove another user")
+	}
+
 
 }
 // endregion
@@ -273,6 +304,10 @@ func TestRemoveMismatching(t *testing.T ){
 // region function: promoteUser
 func TestPromoteUserOk(t *testing.T) {
 
+
+
+
+	t.Errorf("Error forzado")
 }
 
 func TestPromoteUserFailed(t *testing.T) {

@@ -10,6 +10,7 @@ import (
 var mainObj *Main // Main object used for invoking contract's methods
 
 // Deploys the an instance of generalContract and inicializes it with the public address of the creator
+// For clients that don't deploy a contract but just want to access: NewMain(address common.Address, backend bind.ContractBackend) (*Main, error)
 func deployAndInitialize(myTrOps *bind.TransactOpts, myClient *ethclient.Client, ownerPubKeyStr string, ownerUserName string)(addr common.Address, deployTrans *types.Transaction, main *Main, deployError error, initTrans *types.Transaction, initError error){
 	addr, deployTrans, main, deployError = DeployMain(myTrOps, myClient)
 	mainObj = main // We need this main object to be preserved!!!
@@ -26,6 +27,7 @@ func deployAndInitialize(myTrOps *bind.TransactOpts, myClient *ethclient.Client,
 	initTrans,initError = mainObj.Initialize(myTrOps, myPubKey, ownerUserName)
 	return
 }
+
 /*
 // AddUser(opts *bind.TransactOpts, _addr common.Address, _id string) (*types.Transaction, error)
 func contractAddUser (opts *bind.TransactOpts, _addr common.Address, _id string) (trans *types.Transaction,err error) {
