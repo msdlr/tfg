@@ -134,7 +134,7 @@ func TestAddUserOk(t *testing.T){
 }
 
 // Try to register a user with a username taken, and a username that is already registered
-func TestAddUserNotOk(t *testing.T) {
+func TestAddUserAlreadyTaken(t *testing.T) {
 	/* Arrange: We need an initialized contract with a user in it */
 
 	ownerAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5" // [1]
@@ -183,6 +183,35 @@ func TestAddUserNotOk(t *testing.T) {
 	}
 }
 
+func TestAddUserWithoutPermission(t *testing.T) {
+	// ContractOwner
+	ownerPrivKey := "ad92041b60126af952f8320b473ccb555d7274a53f1c27e12d2f1ea8aaecda7b"
+	userPrivKey := "b7e6a03909b31f05c90354dd1a2bf61df5f223198c62551127250fdce2f6ffd4"
+	// Non-admin user that tries to add a new user
+	userAddrStr := "0xe065fAE3BaF52ee871C956E55C88548E4d17F5A5"
+	ownerAddrStr := "0xFDb59BC058eFde421AdF049F27d3A03a4cedea2f"
+
+	// User that is tried to be added
+	otherUserAddrStr := "0x045C24525C46DBfaA8CfF3EA6C48a0e877777bFF"
+
+	/* Arrange: 2 clients and 3 users in the system, one is the contract owner, and a user tries to delete another non-admin */
+	adminTransOps, adminClient := initializeValidClient("http://localhost:7545", 5777, ownerPrivKey) // [0]
+	userTransOps, userClient := initializeValidClient("http://localhost:7545", 5777, userPrivKey)    // [1]
+	contractAddress, _, adminMain, _, _, _ := deployAndInitialize(adminTransOps, adminClient, ownerAddrStr, "TestOwner")
+	userMain, _ := NewMain(contractAddress, userClient)
+
+	adminMain.AddUser(adminTransOps, string2Address(userAddrStr), "newUser")
+
+	/* Act: the new user tries to remove a user from the system */
+	_, addErr := userMain.AddUser(userTransOps, string2Address(otherUserAddrStr), "newUser9")
+
+	// Third user is not expected to be registered
+	otherUserIsRegistered, _ := userMain.GetUserRegistered(nil, string2Address(otherUserAddrStr))
+
+	if addErr == nil || otherUserIsRegistered {
+		t.Errorf("Non-admin user was able to remove another user")
+	}
+}
 //endregion
 
 // region function: rmUser
