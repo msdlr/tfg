@@ -1,9 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"log"
 	"os"
 	"strings"
 	"testing"
@@ -28,7 +33,6 @@ var (
 
 	testChainId     uint16 = 5777
 	testRpcEndpoint        = "http://localhost:7545"
-
 )
 
 // region Auxiliary/stub functions
@@ -44,6 +48,31 @@ func initializeValidClient(endpoint string,chainId uint16,privkey string)(tops *
 
 	return
 }
+
+func testEvents(contractAddress common.Address, c *ethclient.Client) {
+	query := ethereum.FilterQuery{ // Ethereum query for events in a given address
+		Addresses: []common.Address{contractAddress},
+	}
+
+	logChannel := make(chan types.Log) // Channel to receive messages from
+	// Subscribe for events
+	sub, subErr := c.SubscribeFilterLogs(context.Background(), query, logChannel)
+	if !strings.Contains(subErr.Error(), "notifications not supported") {
+		// Testing with Ganache (HTTP) does not support subscribing
+		for {
+			select {
+			case err := <-sub.Err():
+				log.Fatal(err)
+			case vLog := <-logChannel:
+				fmt.Println(vLog) // pointer to event log
+			}
+		}
+	} else {
+		// Print about notifications not being supported
+		fmt.Println("(Notifications for events not supported)")
+	}
+}
+
 // endregion
 
 
@@ -303,7 +332,7 @@ func TestRemoveWithoutPermission(t *testing.T) {
 func TestPromoteUserOk(t *testing.T) {
 	/* Arrange: We need an initialized contract with a user in it */
 	to,c := initializeValidClient(testRpcEndpoint, testChainId, testOwnerPrivKey)
-	_, _, contract, _, _, _ :=deployAndInitialize(to,c, testOwnerAddrStr,testOwnerUsername)
+	contractAddress, _, contract, _, _, _ :=deployAndInitialize(to,c, testOwnerAddrStr,testOwnerUsername)
 
 	userAddr := string2Address(testUser1AddrStr) // Call contract method AddUser
 	_, _ = contract.AddUser(to, userAddr, testUser1Username)
@@ -319,7 +348,11 @@ func TestPromoteUserOk(t *testing.T) {
 	}
 
 	/* Assert event */
+
+	testEvents(contractAddress, c)
+
 }
+
 
 func TestPromoteUserNonExisting(t *testing.T) {
 	/* Arrange: We need an initialized contract with a user in it */
@@ -367,7 +400,7 @@ func TestPromoteUserWithoutPermission(t *testing.T) {
 func TestDemoteAdminOk(t *testing.T) {
 	/* Arrange: Valid contract with two administrators */
 	adminTransOps,adminClient := initializeValidClient(testRpcEndpoint, testChainId,testOwnerPrivKey)
-	_, _, contractAsAdmin, _, _, _ :=deployAndInitialize(adminTransOps,adminClient, testOwnerAddrStr, testOwnerUsername)
+	contractAddress, _, contractAsAdmin, _, _, _ :=deployAndInitialize(adminTransOps,adminClient, testOwnerAddrStr, testOwnerUsername)
 
 	contractAsAdmin.AddUser(adminTransOps,string2Address(testUser1AddrStr),testUser1Username)
 	contractAsAdmin.PromoteUser(adminTransOps,string2Address(testUser1AddrStr)) // Promote user, now two admins in the system
@@ -381,6 +414,9 @@ func TestDemoteAdminOk(t *testing.T) {
 	if demoteErr != nil || isAdmin {
 		t.Errorf("User is admin (expected: not admin)")
 	}
+
+	/* Assert event */
+	testEvents(contractAddress, adminClient)
 }
 
 func TestDemoteNonExistentUser(t *testing.T) {
