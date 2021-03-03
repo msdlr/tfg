@@ -1,4 +1,4 @@
-module main
+module tfg
 
 go 1.16
 

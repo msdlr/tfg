@@ -441,6 +441,12 @@ func TestDemoteWithoutPermission(t *testing.T) {
 		t.Errorf("Non-admin user was able to remove another user")
 	}
 }
+func TestSetOwnerOk (t *testing.T) {
+
+}
+func TestSetOwnerNotOwner (t *testing.T) {
+
+}
 func TestGetOTPOk(t *testing.T){
 
 }
@@ -464,5 +470,15 @@ func TestGetTryLoginUserOnline(t *testing.T){
 
 }
 func TestGetTryLoginUserLocked(t *testing.T){
+
+}
+
+func TestTryLogoutOk(t *testing.T){
+
+}
+func TestTryLogoutUserNotRegistered(t *testing.T){
+
+}
+func TestGetTryLogoutUserOffline(t *testing.T){
 
 }
