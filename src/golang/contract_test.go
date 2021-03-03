@@ -101,6 +101,12 @@ func TestDeployOk(t *testing.T){
 	addrGet,err :=  contract.GetContractAddress(nil)
 	addrGetStr := addrGet.String()
 
+	ownerAddr, _ := contract.GetOwner(nil)
+
+	if ownerAddr.Hex() != testOwnerAddrStr {
+		t.Errorf("Contract owner not properly set")
+	}
+
 	if addrGetStr != addrStr || err != nil{
 		t.Errorf("Created contract address differs from getter "+err.Error())
 	}
@@ -441,7 +447,25 @@ func TestDemoteWithoutPermission(t *testing.T) {
 		t.Errorf("Non-admin user was able to remove another user")
 	}
 }
+
 func TestSetOwnerOk (t *testing.T) {
+	/* Arrange: We need an initialized contract with a user in it */
+	to,c := initializeValidClient(testRpcEndpoint, testChainId, testOwnerPrivKey)
+	_, _, contract, _, _, _ :=deployAndInitialize(to,c, testOwnerAddrStr,testOwnerUsername)
+
+	adminAddress := string2Address(testAdmin2AddrStr) // Call contract method AddUser
+	_, _ = contract.AddUser(to, adminAddress, testAdmin2Username)
+	_, _ = contract.PromoteUser(to,string2Address(testAdmin2AddrStr)) // Promote that user to admin
+
+	/* Act: set that admin as the new owner */
+	_, setOwnerErr := contract.SetOwner(to, adminAddress)
+
+	/* Assert: the new owner has changed */
+	newOwnerAddr,_ := contract.GetOwner(nil)
+
+	if setOwnerErr != nil && newOwnerAddr.Hex() == testAdmin2AddrStr {
+		t.Errorf("New owner was not set properly")
+	}
 
 }
 func TestSetOwnerNotOwner (t *testing.T) {
