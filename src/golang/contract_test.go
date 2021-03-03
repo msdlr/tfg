@@ -106,7 +106,6 @@ func TestDeployOk(t *testing.T){
 	}
 }
 
-// region function: addUser
 
 func TestAddUserOk(t *testing.T){
 	/* Arrange: We need an initialized contract */
@@ -217,7 +216,6 @@ func TestAddUserAlreadyTaken(t *testing.T) {
 		t.Errorf(err1.Error()+"\n"+err2.Error())
 	}
 }
-
 func TestAddUserWithoutPermission(t *testing.T) {
 	/* Arrange: 2 clients and 3 users in the system, one is the contract owner, and a user tries to delete another non-admin */
 	adminTransOps, adminClient := initializeValidClient(testRpcEndpoint, testChainId, testOwnerPrivKey)
@@ -237,9 +235,6 @@ func TestAddUserWithoutPermission(t *testing.T) {
 		t.Errorf("Non-admin user was able to remove another user")
 	}
 }
-//endregion
-
-// region function: rmUser
 func TestRemoveUserOk(t *testing.T ){
 	/* Arrange: We need an initialized contract with a user in it */
 	to,c := initializeValidClient(testRpcEndpoint, testChainId, testOwnerPrivKey)
@@ -265,7 +260,6 @@ func TestRemoveUserOk(t *testing.T ){
 		t.Errorf("User was not properly removed")
 	}
 }
-
 func TestRemoveOwner(t *testing.T ){
 	/* Arrange: We need an initialized contract */
 	to,c := initializeValidClient(testRpcEndpoint, testChainId, testOwnerPrivKey)
@@ -284,7 +278,6 @@ func TestRemoveOwner(t *testing.T ){
 	}
 
 }
-
 func TestRemoveMismatching(t *testing.T ){
 	/* Arrange: We need an initialized contract */
 	to,c := initializeValidClient(testRpcEndpoint, testChainId, testOwnerPrivKey)
@@ -303,7 +296,6 @@ func TestRemoveMismatching(t *testing.T ){
 		t.Errorf("User was removed from the system: "+rmErr.Error())
 	}
 }
-
 func TestRemoveWithoutPermission(t *testing.T) {
 	/* Arrange: 2 clients and 3 users in the system, one is the contract owner, and a user tries to delete another non-admin */
 	adminTransOps,adminClient := initializeValidClient(testRpcEndpoint, testChainId,testOwnerPrivKey)
@@ -326,9 +318,6 @@ func TestRemoveWithoutPermission(t *testing.T) {
 
 
 }
-// endregion
-
-// region function: promoteUser
 func TestPromoteUserOk(t *testing.T) {
 	/* Arrange: We need an initialized contract with a user in it */
 	to,c := initializeValidClient(testRpcEndpoint, testChainId, testOwnerPrivKey)
@@ -352,8 +341,6 @@ func TestPromoteUserOk(t *testing.T) {
 	testEvents(contractAddress, c)
 
 }
-
-
 func TestPromoteUserNonExisting(t *testing.T) {
 	/* Arrange: We need an initialized contract with a user in it */
 	to,c := initializeValidClient(testRpcEndpoint, testChainId, testOwnerPrivKey)
@@ -372,7 +359,6 @@ func TestPromoteUserNonExisting(t *testing.T) {
 		t.Errorf("User not in the system was promoted to admin")
 	}
 }
-
 func TestPromoteUserWithoutPermission(t *testing.T) {
 	/* Arrange: 2 clients and 3 users in the system, one is the contract owner, and a user tries to delete another non-admin */
 	adminTransOps,adminClient := initializeValidClient(testRpcEndpoint, testChainId,testOwnerPrivKey)
@@ -393,10 +379,6 @@ func TestPromoteUserWithoutPermission(t *testing.T) {
 		t.Errorf("Non-admin user was able to remove another user")
 	}
 }
-
-// endregion
-
-// region func demoteAdmin
 func TestDemoteAdminOk(t *testing.T) {
 	/* Arrange: Valid contract with two administrators */
 	adminTransOps,adminClient := initializeValidClient(testRpcEndpoint, testChainId,testOwnerPrivKey)
@@ -418,7 +400,6 @@ func TestDemoteAdminOk(t *testing.T) {
 	/* Assert event */
 	testEvents(contractAddress, adminClient)
 }
-
 func TestDemoteNonExistentUser(t *testing.T) {
 	// User that tries to promote a non-admin user
 	unregisteredUserAddrStr := testUser1AddrStr
@@ -439,7 +420,6 @@ func TestDemoteNonExistentUser(t *testing.T) {
 		t.Errorf("User not in the system is admin (expected: not admin)")
 	}
 }
-
 func TestDemoteWithoutPermission(t *testing.T) {
 	/* Arrange: 2 clients and 3 users in the system, one is the contract owner, and a user tries to delete another non-admin */
 	ownerTransOps, ownerClient := initializeValidClient(testRpcEndpoint, testChainId,testOwnerPrivKey)
@@ -461,4 +441,28 @@ func TestDemoteWithoutPermission(t *testing.T) {
 		t.Errorf("Non-admin user was able to remove another user")
 	}
 }
-// endregion
+func TestGetOTPOk(t *testing.T){
+
+}
+func TestGetOTPUserNotRegistered(t *testing.T){
+
+}
+func TestGetGetOTPUserOnline(t *testing.T){
+
+}
+func TestGetGetOTPUserLocked(t *testing.T){
+
+}
+
+func TestTryLoginOk(t *testing.T){
+
+}
+func TestTryLoginUserNotRegistered(t *testing.T){
+
+}
+func TestGetTryLoginUserOnline(t *testing.T){
+
+}
+func TestGetTryLoginUserLocked(t *testing.T){
+
+}
