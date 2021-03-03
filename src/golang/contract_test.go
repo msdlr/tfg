@@ -103,6 +103,12 @@ func TestDeployOk(t *testing.T){
 
 	ownerAddr, _ := contract.GetOwner(nil)
 
+	isTheOwnerAdmin,_ :=contract.GetUserAdmin(nil,string2Address(testOwnerAddrStr))
+
+	if !isTheOwnerAdmin {
+		t.Errorf("Contract owner was not made admin")
+	}
+
 	if ownerAddr.Hex() != testOwnerAddrStr {
 		t.Errorf("Contract owner not properly set")
 	}
@@ -463,14 +469,32 @@ func TestSetOwnerOk (t *testing.T) {
 	/* Assert: the new owner has changed */
 	newOwnerAddr,_ := contract.GetOwner(nil)
 
-	if setOwnerErr != nil && newOwnerAddr.Hex() == testAdmin2AddrStr {
-		t.Errorf("New owner was not set properly")
+
+	if setOwnerErr !=nil  && newOwnerAddr.Hex() == testAdmin2AddrStr {
+		t.Errorf("New owner was not set properly ("+setOwnerErr.Error()+")")
 	}
 
 }
 func TestSetOwnerNotOwner (t *testing.T) {
+	/* Arrange: We need an initialized contract with a user in it */
+	ownerTops, ownerClient := initializeValidClient(testRpcEndpoint, testChainId, testOwnerPrivKey)
+	contractAddress, _, contract, _, _, _ :=deployAndInitialize(ownerTops, ownerClient, testOwnerAddrStr,testOwnerUsername)
 
+	// Retrieve contract's methods as new user
+	userTops, userClient := initializeValidClient(testRpcEndpoint, testChainId, testUser1PrivKey)
+	contractAsUser, _ := NewMain(contractAddress, userClient)
+
+	/* Act: call setOwner as the new user */
+	_, setOwnerErr := contractAsUser.SetOwner(userTops, string2Address(testUser1AddrStr))
+
+	/* Assert: the new owner has changed */
+	newOwnerAddr,_ := contract.GetOwner(nil)
+
+	if setOwnerErr == nil  || newOwnerAddr.Hex() == testUser1AddrStr {
+		t.Errorf("User was able to change the contract owner")
+	}
 }
+
 func TestGetOTPOk(t *testing.T){
 
 }
