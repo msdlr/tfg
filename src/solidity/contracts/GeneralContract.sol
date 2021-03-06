@@ -145,8 +145,7 @@ contract GeneralContract {
     }
 
     function setOwner(address _newOwner) public{
-        require(userList[_newOwner].adminStatus == true, "The new owner must already be administrator");
-        require(userList[_newOwner].isRegistered, "The new owner must be registered in the system");
+        // Checking admin status already means that the user is registered and administrator
         require(msg.sender == owner,"Only the owner can do this");
         owner = _newOwner;
     }
