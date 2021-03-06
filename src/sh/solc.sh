@@ -5,8 +5,7 @@
 # remove build/ directory if existing
 rm -r build/ 2>/dev/null
 
-for c in ../solidity/contracts/*sol
-do
+c="../solidity/contracts/GeneralContract.sol"
 
 #echo "solc --abi $c --overwrite -o build"
 solc --abi $c --overwrite -o build
@@ -29,7 +28,6 @@ solc --bin $c --overwrite -o build
 #echo "abigen --bin=./build/$c_abi --abi=./build/$c_abi --pkg=main --out=$c_go"
 abigen --bin=./build/$c_bin --abi=./build/$c_abi --pkg=main --out=solc_$c_go  
 
-done
 
 # Post: remove build/ directory and move .go files to src/go
 rm -r build/ 2>/dev/null
