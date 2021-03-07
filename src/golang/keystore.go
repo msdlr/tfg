@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 )
@@ -16,7 +17,7 @@ func OpenAccount(ks *keystore.KeyStore, _pubKey string, _password string) uint8 
 	// Iterate through every account to find which pub key coincides
 	for i := 0; i < len(ethAccArray); i++ {
 		// Check if the pub key is the same as the one provided
-		if _pubKey == ethAccArray[i].Address.Hex() {
+		if strings.Compare(strings.ToLower(_pubKey),strings.ToLower(ethAccArray[i].Address.Hex())) == 0 {
 			err := ks.Unlock(ethAccArray[i], _password)
 			if err == nil {
 				os.Setenv("ETHACC", ethAccArray[i].Address.Hex())
