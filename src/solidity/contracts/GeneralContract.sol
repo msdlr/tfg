@@ -108,11 +108,11 @@ contract GeneralContract {
     }
 
     /* -- USER FUNCTIONS (WRAPPERS)-- */
-    function getOTP() public onlyRegistered userNotLocked returns(uint16 pass_){
-        require (userList[msg.sender].isLoggedIn == false, "Only offline users can get for a key");
-        // We call that specific contract function
-        pass_ = userList[msg.sender].auth.newOTP();
-    }
+    // function getOTP() public onlyRegistered userNotLocked returns(uint16 pass_){
+    //     require (userList[msg.sender].isLoggedIn == false, "Only offline users can get for a key");
+    //     // We call that specific contract function
+    //     pass_ = userList[msg.sender].auth.newOTP();
+    // }
 
     function tryLogin(uint16 _pass) public onlyRegistered userNotLocked {
         // We call that specific contract function
@@ -137,6 +137,20 @@ contract GeneralContract {
         // Can only logout if logged in
         require(userList[msg.sender].isLoggedIn == true, "You are not logged in");
         userList[msg.sender].isLoggedIn = false;
+    }
+
+    // Generates a Keccak256 hash from an unsigned int passed as parameter.  
+    function generateHash(uint16 p) public pure returns (bytes32) {
+        //uint16 p = uint16(uint256(keccak256(abi.encode(block.timestamp, msg.sender))) % 9998) +1;   
+        return keccak256(abi.encodePacked(p));
+    }
+
+    function setHashPass(bytes32 ph) public  {
+        return userList[msg.sender].auth.storePassHash(ph);
+    }
+
+    function getHashPass(uint16 pass) public view returns (bytes32 hash) {
+        return userList[msg.sender].auth.retrieveHashPass(pass);
     }
 
     /* SETTERS / GETTERS */

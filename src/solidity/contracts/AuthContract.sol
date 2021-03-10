@@ -54,9 +54,7 @@ contract AuthContract {
     }
 
     // Returns the generated pass and generate the OTP struture
-    function newOTP() public onlyContract returns (uint16 pass_){
-        // Generate the OTP number
-        uint16 p = uint16(uint256(keccak256(abi.encode(block.timestamp, msg.sender))) % 9998) +1;
+    function newOTP() public onlyContract {
 
         //Fill the OTP fields:
         // Timestamp: relative to today instead of 1970
@@ -68,10 +66,20 @@ contract AuthContract {
         // Used flag
         eOTP.valid = true;
         // Pass Hash
-        eOTP.passHash = keccak256(abi.encode(p));
-        
-        // Return p to be retreived by the interface
-        return p;
+        eOTP.passHash = bytes32("");
+    }
+
+    //function generateNewPass() public view returns (uint16){
+    //    uint16 p = uint16(uint256(keccak256(abi.encode(block.timestamp, msg.sender))) % 9998) +1;
+    //    return p;
+    //}
+
+    function storePassHash(bytes32 ph) public {
+        eOTP.passHash  = ph;
+    }
+
+    function retrieveHashPass(uint16 pass) public pure returns (bytes32 hash) {
+        return keccak256(abi.encode(pass));
     }
 
     function terminate() external onlyContract{
