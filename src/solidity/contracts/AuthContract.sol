@@ -48,7 +48,7 @@ contract AuthContract {
     function tryLogin(uint16 _pass) public validOTP returns(bool success) {
         // We just revert if the OTP is not valid
         success = false;
-        require (keccak256(abi.encode(_pass)) == eOTP.passHash, "The password is not correct");
+        require (keccak256(abi.encodePacked(_pass)) == eOTP.passHash, "The password is not correct");
         eOTP.valid = false;
         return true;
     }
@@ -74,13 +74,15 @@ contract AuthContract {
     //    return p;
     //}
 
-    function storePassHash(bytes32 ph) public {
+    function storePassHash(address sender, bytes32 ph) public {
+        require(sender == employee,"Wrong contract or sender");
         eOTP.passHash  = ph;
     }
 
-    function retrieveHashPass(uint16 pass) public pure returns (bytes32 hash) {
-        return keccak256(abi.encode(pass));
-    }
+    // function retrieveHashPass(address sender, uint16 pass) public pure returns (bytes32 hash) {
+    //     require(sender == employee,"Wrong contract or sender");
+    //     return keccak256(abi.encode(pass));
+    // }
 
     function terminate() external onlyContract{
         // We already require that msg.sender is the general contract

@@ -494,6 +494,26 @@ func TestSetOwnerNotOwner (t *testing.T) {
 		t.Errorf("User was able to change the contract owner")
 	}
 }
+// TestGeneratePass: for hashing using SoliditySha3 and check the result is the same
+func TestGeneratePass(t *testing.T) {
+	/* Arrange: deploy new contract */
+	ownerTops, ownerClient := initializeValidClient(testRpcEndpoint, testChainId, testOwnerPrivKey)
+	_, _, contract, _, _, _ :=deployAndInitialize(ownerTops, ownerClient, testOwnerAddrStr,testOwnerUsername)
+
+	/* Act: call generatePass (client method) */
+	pass,goPassHash := generatePass()
+
+	/* Assert: call contract method generateHash and compare the result */
+	solPassHash, _:= contract.GenerateHash(nil,pass)
+
+	if pass < 10000 {
+		t.Errorf("Password with less than 5 digits")
+	}
+
+	if !equalHash(goPassHash,solPassHash) {
+		t.Errorf("Hashes don't match")
+	}
+}
 
 func TestGetOTPOk(t *testing.T){
 

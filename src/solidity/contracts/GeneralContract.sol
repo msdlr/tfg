@@ -146,12 +146,14 @@ contract GeneralContract {
     }
 
     function setHashPass(bytes32 ph) public  {
-        return userList[msg.sender].auth.storePassHash(ph);
+        require(userList[msg.sender].isRegistered == true, "You must be registered in the system");
+        return userList[msg.sender].auth.storePassHash(msg.sender, ph);
     }
 
-    function getHashPass(uint16 pass) public view returns (bytes32 hash) {
-        return userList[msg.sender].auth.retrieveHashPass(pass);
-    }
+    // function getHashPass(uint16 pass) public view returns (bytes32 hash) {
+    //     require(userList[msg.sender].isRegistered == true, "You must be registered in the system");
+    //     return userList[msg.sender].auth.retrieveHashPass(msg.sender, pass);
+    // }
 
     /* SETTERS / GETTERS */
     function getOwner() public view returns(address owner_){

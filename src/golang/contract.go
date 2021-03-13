@@ -5,6 +5,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+	solsha3 "github.com/msdlr/go-solidity-sha3"
+	"math/rand"
+	"time"
 )
 
 var mainObj *Main // Main object used for invoking contract's methods
@@ -25,6 +28,38 @@ func deployAndInitialize(myTrOps *bind.TransactOpts, myClient *ethclient.Client,
 	 */
 	myPubKey := string2Address(ownerPubKeyStr)
 	initTrans,initError = mainObj.Initialize(myTrOps, myPubKey, ownerUserName)
+	return
+}
+
+// generatePass generates a hashed OTP number (10000-65535) to store on a smart contract
+func generatePass() (pass uint16, passHash []byte) {
+	// Generate the random password
+	seed := rand.NewSource(time.Now().UnixNano())
+	pass = 1
+
+	// Generate a random number bigger than 1E5 (so that there are 5 digits)
+	for true {
+		num := uint16(rand.New(seed).Uint32())
+		if num >= 10000 {
+			// If found we've finished
+			pass = num
+			break
+		}
+	}
+
+	// Hash it
+	passHash = solsha3.SoliditySHA3([]string{"uint16"}, pass)
+	return
+}
+
+// equalHash compares a slice of bytes against a 32-bytes array
+func equalHash(h1 []byte, h2 [32]byte) (eq bool){
+	eq=true
+	for i:=0;i<32;i++{
+		if h1[i] != h2[i]{
+			return false
+		}
+	}
 	return
 }
 
