@@ -510,43 +510,46 @@ func TestGeneratePass(t *testing.T) {
 		t.Errorf("Password with less than 5 digits")
 	}
 
-	if !equalHash(goPassHash,solPassHash) {
+	if goPassHash != solPassHash {
 		t.Errorf("Hashes don't match")
 	}
 }
 
-func TestGetOTPOk(t *testing.T){
+func TestSetHashPassOk(t *testing.T){
+	/* Arrange: deploy new contract and generate an OTP */
+	ownerTops, ownerClient := initializeValidClient(testRpcEndpoint, testChainId, testOwnerPrivKey)
+	_, _, contract, _, _, _ :=deployAndInitialize(ownerTops, ownerClient, testOwnerAddrStr,testOwnerUsername)
 
-}
-func TestGetOTPUserNotRegistered(t *testing.T){
+	/* Act: call contract to store the pass hash */
+	_,_, err := genPassAndStoreHash(contract, ownerTops)
 
-}
-func TestGetGetOTPUserOnline(t *testing.T){
-
-}
-func TestGetGetOTPUserLocked(t *testing.T){
-
-}
-
-func TestTryLoginOk(t *testing.T){
-
-}
-func TestTryLoginUserNotRegistered(t *testing.T){
-
-}
-func TestGetTryLoginUserOnline(t *testing.T){
-
-}
-func TestGetTryLoginUserLocked(t *testing.T){
-
+	/* Assert: no error occurred */
+	if err != nil {
+		t.Errorf("Error: %v", err.Error())
+	}
 }
 
-func TestTryLogoutOk(t *testing.T){
-
-}
-func TestTryLogoutUserNotRegistered(t *testing.T){
-
-}
-func TestGetTryLogoutUserOffline(t *testing.T){
-
-}
+//func TestSetHashPassNotRegistered(t *testing.T){
+//	/* Arrange: deploy new contract with a new user */
+//	ownerTops, ownerClient := initializeValidClient(testRpcEndpoint, testChainId, testOwnerPrivKey)
+//	_, _, contract, _, _, _ :=deployAndInitialize(ownerTops, ownerClient, testOwnerAddrStr,testOwnerUsername)
+//	contract.AddUser(ownerTops,string2Address(testUser1AddrStr),testUser1Username)
+//
+//	// User client
+//	userTops, userClient := initializeValidClient(testRpcEndpoint, testChainId, testUser1PrivKey)
+//	userContract,_ := NewMain(string2Address(testUser1AddrStr),userClient)
+//
+//	/* Act: call contract to store the pass hash */
+//	authAddr, _ := contract.GetUserAuthContract(nil,string2Address(testUser1AddrStr))
+//	fmt.Println(authAddr)
+//
+//
+//	authAddr, _ = userContract.GetUserAuthContract(nil,string2Address(testOwnerAddrStr))
+//	fmt.Println(authAddr)
+//	_,_, err := genPassAndStoreHash(userContract, userTops)
+//
+//	/* Assert: no error occurred */
+//	if err != nil {
+//		t.Errorf("Error: %v", err.Error())
+//	}
+//}
