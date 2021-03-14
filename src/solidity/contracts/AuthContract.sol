@@ -74,7 +74,7 @@ contract AuthContract {
     //    return p;
     //}
 
-    function storePassHash(address sender, bytes32 ph) public {
+    function storePassHash(address sender, bytes32 ph) public onlyContract{
         require(sender == employee,"Wrong contract or sender");
         eOTP.passHash  = ph;
     }

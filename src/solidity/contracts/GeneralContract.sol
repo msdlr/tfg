@@ -42,16 +42,13 @@ contract GeneralContract {
 
     /* CONSTRUCTOR */
 
-    constructor() public payable{
+    constructor() payable{
         // Instantiate the contract
+        owner = msg.sender;
     }
 
     function initialize(address owner_, string memory id_) public payable{
-        // Require that the is no owner
-        require(owner == address(0),"");
-
-        // Set the owner of the company
-        owner = owner_;
+        require(owner == msg.sender,"");
 
         // Add it to the admin list
         userList[owner].isRegistered = true;
@@ -191,8 +188,8 @@ contract GeneralContract {
         return userList[_addr].adminStatus;
     }
 
-    function getUserAuthContract(address _addr) public view returns (AuthContract){
-        return userList[_addr].auth;
+    function getUserAuthContract(address _addr) public view returns (address){
+        return address(userList[_addr].auth);
     }
 
     function getUserAttempts(address _addr) public view returns (uint8){
