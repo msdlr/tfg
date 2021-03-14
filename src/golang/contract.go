@@ -32,7 +32,7 @@ func deployAndInitialize(myTrOps *bind.TransactOpts, myClient *ethclient.Client,
 }
 
 // generatePass generates a hashed OTP number (10000-65535) to store on a smart contract
-func generatePass() (pass uint16, passHash []byte) {
+func generatePass() (pass uint16, passHash32 [32]byte) {
 	// Generate the random password
 	seed := rand.NewSource(time.Now().UnixNano())
 	pass = 1
@@ -48,18 +48,26 @@ func generatePass() (pass uint16, passHash []byte) {
 	}
 
 	// Hash it
-	passHash = solsha3.SoliditySHA3([]string{"uint16"}, pass)
+	passHash := solsha3.SoliditySHA3([]string{"uint16"}, pass)
+	return pass, sliceToArray32(passHash)
+}
+
+// sliceToArray32 is the opposite of array[:] which transforms an array into a slice
+func sliceToArray32(in []byte) (out [32]byte){
+	for i:=0;i<32;i++{
+		out[i]= in[i]
+	}
 	return
 }
 
-// equalHash compares a slice of bytes against a 32-bytes array
-func equalHash(h1 []byte, h2 [32]byte) (eq bool){
-	eq=true
-	for i:=0;i<32;i++{
-		if h1[i] != h2[i]{
-			return false
-		}
-	}
+func generateAndStorePassHash(){
+
+}
+
+// genPassAndStoreHash is a wrapper that generates a pass Hash and writes it into a contract. OTP pass generation and writing on a contract should be performed together
+func genPassAndStoreHash(contractMain *Main, transactionOpts *bind.TransactOpts) (pass uint16, passHash [32]byte, setHashPassError error) {
+	pass, passHash = generatePass()
+	_, setHashPassError = contractMain.SetHashPass(transactionOpts, passHash)
 	return
 }
 
