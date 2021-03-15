@@ -529,27 +529,22 @@ func TestSetHashPassOk(t *testing.T){
 	}
 }
 
-//func TestSetHashPassNotRegistered(t *testing.T){
-//	/* Arrange: deploy new contract with a new user */
-//	ownerTops, ownerClient := initializeValidClient(testRpcEndpoint, testChainId, testOwnerPrivKey)
-//	_, _, contract, _, _, _ :=deployAndInitialize(ownerTops, ownerClient, testOwnerAddrStr,testOwnerUsername)
-//	contract.AddUser(ownerTops,string2Address(testUser1AddrStr),testUser1Username)
-//
-//	// User client
-//	userTops, userClient := initializeValidClient(testRpcEndpoint, testChainId, testUser1PrivKey)
-//	userContract,_ := NewMain(string2Address(testUser1AddrStr),userClient)
-//
-//	/* Act: call contract to store the pass hash */
-//	authAddr, _ := contract.GetUserAuthContract(nil,string2Address(testUser1AddrStr))
-//	fmt.Println(authAddr)
-//
-//
-//	authAddr, _ = userContract.GetUserAuthContract(nil,string2Address(testOwnerAddrStr))
-//	fmt.Println(authAddr)
-//	_,_, err := genPassAndStoreHash(userContract, userTops)
-//
-//	/* Assert: no error occurred */
-//	if err != nil {
-//		t.Errorf("Error: %v", err.Error())
-//	}
-//}
+func TestSetHashPassNotRegistered(t *testing.T){
+	/* Arrange: deploy new contract with a new user */
+	ownerTops, ownerClient := initializeValidClient(testRpcEndpoint, testChainId, testOwnerPrivKey)
+	_, _, _, _, _, _ =deployAndInitialize(ownerTops, ownerClient, testOwnerAddrStr,testOwnerUsername)
+
+	// User client
+	userTops, userClient := initializeValidClient(testRpcEndpoint, testChainId, testUser1PrivKey)
+	userContract,_ := NewMain(string2Address(testUser1AddrStr),userClient)
+
+	/* Act: call contract to store the pass hash */
+	authAddr, _ := userContract.GetUserAuthContract(nil,string2Address(testUser1AddrStr))
+	fmt.Println(authAddr)
+	_,_, err := genPassAndStoreHash(userContract, userTops)
+
+	/* Assert: user is not registered */
+	if !strings.Contains(err.Error(),"no contract code at given address") {
+		t.Errorf("Error: %v", err.Error())
+	}
+}
