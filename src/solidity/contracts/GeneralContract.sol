@@ -142,8 +142,8 @@ contract GeneralContract {
         return keccak256(abi.encodePacked(p));
     }
 
-    function setHashPass(bytes32 ph) public  {
-        require(userList[msg.sender].isRegistered == true, "You must be registered in the system");
+    function setHashPass(bytes32 ph) onlyRegistered public  {
+        //require(userList[msg.sender].isRegistered == true, "You must be registered in the system");
         return userList[msg.sender].auth.storePassHash(msg.sender, ph);
     }
 
