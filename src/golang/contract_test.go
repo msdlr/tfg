@@ -546,3 +546,17 @@ func TestSetHashPassNotRegistered(t *testing.T) {
 		t.Errorf("Error: %v", err.Error())
 	}
 }
+
+func TestNewOTPOk(t *testing.T) {
+	/* Arrange: deploy new contract with a new user */
+	ownerTops, ownerClient := initializeValidClient(testRpcEndpoint, testChainId, testOwnerPrivKey)
+	_, _, m, _, _, _ := deployAndInitialize(ownerTops, ownerClient, testOwnerAddrStr, testOwnerUsername)
+
+	/* Act: Ask for a new otp */
+	_, err := m.NewOTP(ownerTops)
+
+	/* Assert: no error */
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+}
