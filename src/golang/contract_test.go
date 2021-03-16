@@ -529,22 +529,20 @@ func TestSetHashPassOk(t *testing.T){
 	}
 }
 
-func TestSetHashPassNotRegistered(t *testing.T){
+func TestSetHashPassNotRegistered(t *testing.T) {
 	/* Arrange: deploy new contract with a new user */
 	ownerTops, ownerClient := initializeValidClient(testRpcEndpoint, testChainId, testOwnerPrivKey)
-	_, _, _, _, _, _ =deployAndInitialize(ownerTops, ownerClient, testOwnerAddrStr,testOwnerUsername)
+	_, _, _, _, _, _ = deployAndInitialize(ownerTops, ownerClient, testOwnerAddrStr, testOwnerUsername)
 
 	// User client
 	userTops, userClient := initializeValidClient(testRpcEndpoint, testChainId, testUser1PrivKey)
-	userContract,_ := NewMain(string2Address(testUser1AddrStr),userClient)
+	userContract, _ := NewMain(string2Address(testUser1AddrStr), userClient)
 
 	/* Act: call contract to store the pass hash */
-	authAddr, _ := userContract.GetUserAuthContract(nil,string2Address(testUser1AddrStr))
-	fmt.Println(authAddr)
-	_,_, err := genPassAndStoreHash(userContract, userTops)
+	_, _, err := genPassAndStoreHash(userContract, userTops)
 
-	/* Assert: user is not registered */
-	if !strings.Contains(err.Error(),"no contract code at given address") {
+	/* Assert: user is not registered and we get either of these error */
+	if !strings.Contains(err.Error(), "no contract code at given address") || !strings.Contains(err.Error(), "You must be registered in the system") {
 		t.Errorf("Error: %v", err.Error())
 	}
 }
