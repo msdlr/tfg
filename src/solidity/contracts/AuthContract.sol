@@ -90,7 +90,7 @@ contract AuthContract {
 
     //Day number since 1/1/2020 (UNIX time + 50 years)
     function getToday() private view returns(uint16 today){
-        today = uint16(block.timestamp / 1 days) - uint16(50*365 days);
+        today = uint16(block.timestamp / 1 days) - uint16(50*365);
         return today;
     }
     function secondOfDay() private view returns(uint24 sec){
