@@ -560,3 +560,25 @@ func TestNewOTPOk(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 }
+
+func TestNewOTPNotRegistered(t *testing.T) {
+	/* Arrange: deploy new contract with a new user */
+	ownerTops, ownerClient := initializeValidClient(testRpcEndpoint, testChainId, testOwnerPrivKey)
+	_, _, _, _, _, _ = deployAndInitialize(ownerTops, ownerClient, testOwnerAddrStr, testOwnerUsername)
+
+	// User client
+	userTops, userClient := initializeValidClient(testRpcEndpoint, testChainId, testUser1PrivKey)
+	userContract, _ := NewMain(string2Address(testUser1AddrStr), userClient)
+
+	/* Act: call newOTP */
+	_, err := userContract.NewOTP(userTops)
+
+	/* Assert: there must be an error that contains that message */
+	if err == nil || !strings.Contains(err.Error(),"no contract code at given address") {
+		t.Errorf(err.Error())
+	}
+}
+
+func TestNewOTPUserLocked(t *testing.T) {
+
+}
