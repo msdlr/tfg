@@ -542,7 +542,7 @@ func TestSetHashPassNotRegistered(t *testing.T) {
 	_, _, err := genPassAndStoreHash(userContract, userTops)
 
 	/* Assert: user is not registered and we get either of these error */
-	if !strings.Contains(err.Error(), "no contract code at given address") || !strings.Contains(err.Error(), "You must be registered in the system") {
+	if !(strings.Contains(err.Error(), "no contract code at given address") || strings.Contains(err.Error(), "You must be registered in the system")) {
 		t.Errorf("Error: %v", err.Error())
 	}
 }
