@@ -55,7 +55,6 @@ contract AuthContract {
 
     // Returns the generated pass and generate the OTP struture
     function newOTP() public onlyContract {
-
         //Fill the OTP fields:
         // Timestamp: relative to today instead of 1970
         eOTP.time = uint24(block.timestamp % 1 days); // Timestamp relative to the day
@@ -91,8 +90,8 @@ contract AuthContract {
 
     //Day number since 1/1/2020 (UNIX time + 50 years)
     function getToday() private view returns(uint16 today){
-        uint day = (block.timestamp / 1 days) - (50*365 days);
-        return uint16(day);
+        today = uint16(block.timestamp / 1 days) - uint16(50*365 days);
+        return today;
     }
     function secondOfDay() private view returns(uint24 sec){
         sec = uint24(block.timestamp % getToday());

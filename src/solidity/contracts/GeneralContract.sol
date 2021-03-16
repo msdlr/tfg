@@ -105,11 +105,11 @@ contract GeneralContract {
     }
 
     /* -- USER FUNCTIONS (WRAPPERS)-- */
-    // function getOTP() public onlyRegistered userNotLocked returns(uint16 pass_){
-    //     require (userList[msg.sender].isLoggedIn == false, "Only offline users can get for a key");
-    //     // We call that specific contract function
-    //     pass_ = userList[msg.sender].auth.newOTP();
-    // }
+    function newOTP() public onlyRegistered userNotLocked {
+        require (userList[msg.sender].isLoggedIn == false, "Only offline users can get for a key");
+        // We call that specific contract function
+        userList[msg.sender].auth.newOTP();
+    }
 
     function tryLogin(uint16 _pass) public onlyRegistered userNotLocked {
         // We call that specific contract function
